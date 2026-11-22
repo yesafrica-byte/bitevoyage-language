@@ -1,4 +1,4 @@
-/* BiteVoyage Language Quest Premium V6.3 | 1920 expressions | clickable word audio | PWA intact */
+/* BiteVoyage Language Quest Premium V6.3 r8 | 1920 expressions | clickable word audio | PWA intact */
 (function(){
 'use strict';
 function boot(){
@@ -14,7 +14,7 @@ function boot(){
  const LEVEL_LABELS={'beginner':'초급','intermediate':'중급','advanced':'고급'};
  const EXPECTED={'beginner':16,'intermediate':8,'advanced':8};
  let total=0,readings=0,aligned=0,integrityError='';
- if(cfg.version!=='6.3.0'||cfg.build_id!=='bvq63-20261122-quality-r1') integrityError='데이터·엔진 버전 불일치';
+ if(cfg.version!=='6.3.0'||cfg.build_id!=='bvq63-20261123-pronunciation-r8') integrityError='데이터·엔진 버전 불일치';
  if(!integrityError) for(const lng of supported){
   if(!cfg.data[lng]){integrityError='언어 데이터 누락: '+lng;break;}
   for(const sc of cfg.scenes.map(s=>s[0])){
@@ -493,10 +493,30 @@ function boot(){
   return special[script]||jaKanaReading(reading)||script;
  }
 
+ function zhWordSpeech(script,reading){
+  if(lang!=='zh')return script;
+  const text=current()[0];
+  const r=reading.toLowerCase().replace(/[.,!?。！？、\s]/g,'');
+  if(script==='地'&&r==='de'&&text.includes('一步一步地'))return '一步一步地';
+  if(script==='得'&&r==='de'){
+   if(text.includes('上得'))return '上得';
+   if(text.includes('解释得'))return '解释得';
+  }
+  if(script==='着'&&r==='zhe'){
+   if(text.includes('留着'))return '留着';
+   if(text.includes('陪着'))return '陪着';
+  }
+  if(script==='行'&&r==='xíng'&&text.includes('人行横道'))return '人行横道';
+  if(script==='还'&&r==='hái'){
+   for(const phrase of ['还咳嗽','还能','还没','还要'])if(text.includes(phrase))return phrase;
+  }
+  return script;
+ }
+
  function wordClick(event,container){
   const button=event.target.closest('button[data-bvq-word]');if(!button||!container.contains(button))return;
   const original=button.dataset.bvqWord;
-  const speech=jaWordSpeech(original,button.dataset.bvqReading||'');
+  const speech=lang==='zh'?zhWordSpeech(original,button.dataset.bvqReading||''):jaWordSpeech(original,button.dataset.bvqReading||'');
   speakText(speech,0.86,'word',button);
  }
  $('vocab-list').addEventListener('click',e=>wordClick(e,$('vocab-list')));
