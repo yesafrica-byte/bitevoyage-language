@@ -197,15 +197,44 @@ function boot(){
   };
   if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(run);else run();
  }
- function scrollToScenes(){scrollToSection($('scenes'));}
- function scrollToLevels(){scrollToSection($('levels'));}
- function scrollToLesson(){scrollToSection($('lesson'));}
- // The prominent hero CTA and direct #bvq-start links follow the same top offset.
+ // V6.3 r5: STEP 01 alone also supports the #bvq-start URL anchor.
+ // Blogger may insert ads/resize its surrounding layout AFTER that initial anchor jump.
+ // STEP 02-04 already scroll after user selection, so their approved offsets stay unchanged.
+ let startAlignToken=0;
+ function cancelStartAlignment(){startAlignToken++;}
+ function scrollToScenes(){cancelStartAlignment();scrollToSection($('scenes'));}
+ function scrollToLevels(){cancelStartAlignment();scrollToSection($('levels'));}
+ function scrollToLesson(){cancelStartAlignment();scrollToSection($('lesson'));}
  const startSection=document.getElementById('bvq-start');
+ function scrollToStart(instant=false){
+  if(!startSection)return;
+  const token=++startAlignToken;
+  scrollToSection(startSection,instant);
+  function verifyStartPosition(){
+   if(token!==startAlignToken||window.location.hash!=='#bvq-start')return;
+   const panel=targetPanel(startSection);
+   if(!panel||!panel.isConnected)return;
+   const gap=topInset(panel);
+   const difference=panel.getBoundingClientRect().top-gap;
+   // Re-align only when Blogger's delayed layout causes a visible discrepancy.
+   if(Math.abs(difference)>5){
+    panel.style.scrollMarginTop=gap+'px';
+    try{window.scrollTo({top:Math.max(0,window.scrollY+difference),behavior:'instant'});}
+    catch(e){window.scrollTo(0,Math.max(0,window.scrollY+difference));}
+   }
+  }
+  // Wait until normal smooth scrolling is complete before verifying; also handle
+  // delayed ads, image sizing and the native fragment jump on direct URL visits.
+  [750,1550,2900].forEach(ms=>window.setTimeout(verifyStartPosition,ms));
+  if(document.readyState!=='complete')window.addEventListener('load',()=>window.setTimeout(verifyStartPosition,110),{once:true});
+ }
+ // Any manual scroll/tap cancels delayed correction to avoid surprising jumps.
+ ['wheel','touchstart','pointerdown','keydown'].forEach(type=>
+  window.addEventListener(type,cancelStartAlignment,{passive:true}));
  root.querySelectorAll('a[href="#bvq-start"]').forEach(link=>link.addEventListener('click',event=>{
   event.preventDefault();
   if(window.history&&history.replaceState)history.replaceState(null,'','#bvq-start');
-  scrollToSection(startSection);
+  scrollToStart();
  }));
  // Apply the same landing margin for any native in-page anchor navigation.
  if(startSection)startSection.style.scrollMarginTop=topInset(startSection)+'px';
@@ -429,7 +458,7 @@ function boot(){
    }catch(e){openInstallGateway();}
   }else openInstallGateway();
  });
- restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToSection(startSection,true);status('✓ V6.3 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
+ restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToStart(true);status('✓ V6.3 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
  if(document.readyState==='complete')initAds();else window.addEventListener('load',initAds,{once:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

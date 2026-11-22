@@ -1,31 +1,34 @@
-BiteVoyage Premium V6.3 · STEP 01~04 상단 착지 위치 최적화 r4
+BiteVoyage Premium V6.3 — STEP 01 상단 여백 보정 (r5)
 
-필수 수정 파일: bvq62-engine.js (기존 GitHub 파일명 그대로 덮어쓰기)
-선택 수정 파일: index.html (GitHub Pages 자체 테스트 페이지의 캐시만 갱신)
-Blogger 본문 전체 교체: 불필요. 엔진 JS URL의 캐시값만 r4로 교체.
+현상
+- STEP 01의 ‘무료 학습 시작하기’ 또는 공유된 #bvq-start 링크는 페이지가 처음 표시될 때도 이동합니다.
+- Blogger 테마, 광고, 웹폰트 등의 레이아웃 로딩이 뒤늦게 끝나면 첫 이동 위치가 달라질 수 있습니다.
+- STEP 02, 03, 04는 사용자 선택 후 이동하므로 상대적으로 정확합니다.
+- 라이브 기기의 정확한 원인은 화면을 직접 측정할 수 없어 '유력한 원인'으로 판단합니다.
 
-1) GitHub main 루트에서 bvq62-engine.js 덮어쓰기 후 Commit.
-2) GitHub Pages의 직접 테스트 페이지를 이용한다면 index.html도 덮어쓰기.
-3) Blogger 게시글 HTML 보기에서 bvq62-engine.js?v= URL만 찾아 다음 값을 교체:
-   기존: bvq63-stepflow-20261122-r3
-   변경: bvq63-stepoffset-20261122-r4
-4) bvq62-data.js 파일, 1920개 데이터, Manifest, PWA, Service Worker, 아이콘 등 변경 금지.
+수정 내용
+- STEP 01 이동 직후 페이지 레이아웃이 늦게 변경될 때만 실제 위치를 재측정해 상단 간격을 보정.
+- STEP 02, 03, 04의 기존 상단 여백 계산식은 보존.
+- 사용자가 직접 스크롤하거나 언어/상황/난이도를 선택하면 STEP 01의 지연 보정을 즉시 취소.
+- 기존 1,920개 문장, 학습기록(localStorage), 발음, 퀴즈, PWA, 공유 기능 변경 없음.
 
-적용된 이동:
-- 첫 화면 '무료 학습 시작하기' → STEP 01
-- 언어 선택 → STEP 02
-- 여행 상황 선택 → STEP 03
-- 난이도 선택 → STEP 04
-- 이어서 학습 / 오답 복습(오답 있을 때만) → STEP 04
+GitHub 업로드
+1) github.com/yesafrica-byte/bitevoyage-language 에서 현재 main 브랜치 파일 백업.
+2) bvq62-engine.js 를 같은 이름으로 덮어쓰기(필수).
+3) index.html 을 덮어쓰기(GitHub Pages 자체 테스트용, 권장).
+4) Commit changes → Pages 배포 확인.
+5) bvq62-data.js, install/launch/sw, manifest, 아이콘은 수정하지 않음.
 
-착지 상단 간격: 모바일 14px / 태블릿 18px / PC 22px + 실제 고정/스티키 메뉴의 화면 상단 가림 높이.
-예전 76~86px 고정 여백을 제거하고 모바일 Safari/Chrome 등의 레이아웃 차이에 대응합니다.
-움직임 줄이기 설정 시 즉시 이동. 상황 검색 중 버튼을 누르면 키보드 닫기.
+Blogger 적용 — 전체 HTML 변경 불필요
+기존 JS 줄:
+<script defer src="https://yesafrica-byte.github.io/bitevoyage-language/bvq62-engine.js?v=bvq63-stepoffset-20261122-r4"></script>
 
-기존 V6.3 데이터와 엔진 검사 식별자 6.3.0 / bvq63-20261122-quality-r1 유지.
-기존 학습 기록 localStorage 키, 1920개 표현, TTS, KEY VOCAB, 퀴즈, XP, 오답 복습, 공유, PWA 설치 로직 유지.
+변경 JS 줄:
+<script defer src="https://yesafrica-byte.github.io/bitevoyage-language/bvq62-engine.js?v=bvq63-step1-gapfix-20261122-r5"></script>
 
-운영 주의: 사용자 휴대전화의 브라우저 주소창은 웹페이지가 위치를 제어할 수 없습니다.
-고정 메뉴가 200px를 초과하는 비정상 테마 구성은 수동 조정이 필요할 수 있습니다.
-
-반영 후 단계별 클릭 시 STEP 문구와 제목이 가려지지 않는지 모바일 시크릿 창에서 확인하세요.
+주의
+- ?v= 뒤 값만 변경합니다. bvq62-engine.js 파일명 유지.
+- DATA 스크립트의 ?v=bvq63-20261122-quality-r1 은 수정하지 않습니다.
+- 전체 본문 교체보다 위의 한 줄 변경을 권장합니다.
+- 2~4단계 기존 화면 상단 간격 14/18/22px(+고정메뉴 높이) 유지.
+- 적용 후 모바일 시크릿 모드에서 '무료 학습 시작하기', 공유 링크 #bvq-start, STEP 1→2→3→4 점검.
