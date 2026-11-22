@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BV 아이콘 설치 · BiteVoyage Language Quest</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0a3554">
+<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" href="./favicon-192.png"><link rel="apple-touch-icon" href="./favicon-192.png">
+<style>
+*{box-sizing:border-box}html{color-scheme:light}body{margin:0;min-height:100svh;font:16px/1.6 system-ui,-apple-system,'Noto Sans KR',sans-serif;color:#13314a;background:radial-gradient(circle at 85% 0%,#cdfbf0,transparent 38%),linear-gradient(150deg,#f5fbff,#e8f1f8);display:grid;place-items:center;padding:24px}
+main{width:min(100%,490px);background:#fff;border:1px solid #d6e6eb;box-shadow:0 22px 65px #0a355420;border-radius:28px;padding:clamp(24px,5vw,42px)}.brand{display:flex;align-items:center;gap:16px}.brand img{width:82px;height:82px;border-radius:22px;box-shadow:0 12px 30px #09415620}.eyebrow{font-size:12px;font-weight:900;letter-spacing:.12em;color:#08767b}h1{font-size:clamp(25px,6vw,32px);line-height:1.26;margin:8px 0;color:#102f4a}p{color:#52677a;margin:18px 0}button,.link{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:999px;font-weight:850;font-size:17px;text-decoration:none;cursor:pointer}button{background:linear-gradient(115deg,#036b89,#087d80);border:0;color:#fff;box-shadow:0 10px 22px #007c7a2a}button:focus-visible,.link:focus-visible{outline:3px solid #e8af25;outline-offset:3px}.link{margin-top:10px;border:1px solid #c8dce6;background:#f6fbfe;color:#154059}.foot{font-size:12px;color:#657b88;text-align:center;margin:18px 0 0}.note{font-size:13px;background:#f0f7fa;padding:13px 16px;border-radius:14px;color:#496375;display:none;margin-top:14px}.note.show{display:block}.status{font-size:13px;font-weight:750;color:#166973;min-height:24px;margin:13px 0 0}@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style></head><body><main>
+<div class="brand"><img src="./favicon-192.png" width="82" height="82" alt="BV BiteVoyage"><div><div class="eyebrow">BITEVOYAGE · PREMIUM</div><h1>아이콘으로 바로 학습</h1></div></div>
+<p>홈 화면에 <b>BV 아이콘</b>을 추가하세요. 아이콘을 누르면 기존 BiteVoyage 무료 여행 회화 게시글이 열립니다.</p>
+<button id="install" type="button">📲 BV 아이콘 설치</button>
+<div id="note" class="note" role="note"></div><div id="status" class="status" role="status" aria-live="polite"></div>
+<a class="link" href="https://www.bitevoyage.com/2026/11/travel-language-quest-free-english-japanese-chinese-korean.html">🌐 지금 바로 학습하기</a>
+<p class="foot">앱스토어 가입 불필요 · 설치는 브라우저 승인 필요 · 4개 국어 1,792개 표현</p></main>
+<script>
+(()=>{'use strict';
+let deferred=null;
+const btn=document.querySelector('#install'), status=document.querySelector('#status'),note=document.querySelector('#note');
+function show(msg){note.textContent=msg;note.classList.add('show');}
+function hint(){
+ const ua=navigator.userAgent||'';
+ if(/iPad|iPhone|iPod/i.test(ua))show('iPhone: Safari 또는 지원 브라우저의 공유 메뉴 → 홈 화면에 추가 → 추가를 선택하세요.');
+ else if(/Android/i.test(ua))show('Android: Chrome 오른쪽 위 ⋮ → 앱 설치 또는 홈 화면에 추가 → 설치/추가를 선택하세요.');
+ else show('PC: Chrome/Edge 주소창의 설치 아이콘 또는 브라우저 메뉴에서 앱 설치를 선택하세요.');
+}
+window.addEventListener('beforeinstallprompt',ev=>{ev.preventDefault();deferred=ev;status.textContent='설치 준비 완료 · 버튼을 누르면 브라우저 승인창이 열립니다.';});
+window.addEventListener('appinstalled',()=>{status.textContent='✓ BV 아이콘 설치가 완료되었습니다. 홈 화면에서 확인해 주세요.';note.classList.remove('show');deferred=null;});
+btn.addEventListener('click',async()=>{
+ if(deferred){const ev=deferred;deferred=null;
+  try{await ev.prompt();const choice=await ev.userChoice;
+   if(choice&&choice.outcome==='accepted')status.textContent='설치 요청을 승인했습니다. 홈 화면을 확인해 주세요.';
+   else{status.textContent='설치가 취소되었습니다.';hint();}
+  }catch(e){status.textContent='브라우저 메뉴를 이용해 설치해 주세요.';hint();}
+  return;
+ }
+ if(typeof navigator.install==='function'){try{await navigator.install();status.textContent='설치 요청이 처리되었습니다. 홈 화면을 확인해 주세요.';return;}catch(e){if(e&&e.name==='AbortError'){status.textContent='설치가 취소되었습니다.';return;}}}
+ hint();
+});
+if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+})();
+</script></body></html>
