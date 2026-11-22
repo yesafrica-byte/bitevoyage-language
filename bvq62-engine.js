@@ -145,7 +145,7 @@ function boot(){
   const chosen=selectVocab(decode(current()[0]),lang,current()[3]);
   for(const [term,pron,description] of chosen){
    const chip=make('button','bv-word-note bv-word-audio');chip.type='button';
-   chip.dataset.bvqWord=term;chip.setAttribute('aria-label',term+' 단어 발음 듣기');chip.setAttribute('aria-pressed','false');
+   chip.dataset.bvqWord=term;chip.dataset.bvqReading=pron;chip.setAttribute('aria-label',term+' 단어 발음 듣기');chip.setAttribute('aria-pressed','false');
    chip.title=term+' · 눌러서 해당 단어 발음 듣기';
    chip.append(make('strong','',term),make('small','',pron),make('span','',description),make('em','bv-word-play-hint','🔊 터치하여 단어 듣기'));
    list.append(chip);
@@ -332,7 +332,7 @@ function boot(){
   put('roman',pairs.map(x=>x[1]).join(' '));
   $('aligned-chips').replaceChildren();
   for(const [script,sound] of pairs){
-   const c=make('button','bv-match-chip bv-word-audio');c.type='button';c.dataset.bvqWord=script;c.setAttribute('aria-label',script+' 단어 발음 듣기');c.setAttribute('aria-pressed','false');c.title=script+' · 단어 듣기';
+   const c=make('button','bv-match-chip bv-word-audio');c.type='button';c.dataset.bvqWord=script;c.dataset.bvqReading=sound;c.setAttribute('aria-label',script+' 단어 발음 듣기');c.setAttribute('aria-pressed','false');c.title=script+' · 단어 듣기';
    c.append(make('strong','bv-match-script',script),make('small','bv-match-sound',sound));$('aligned-chips').append(c);
   }
   $('segment-box').dataset.alignment=pairs.length>1?'grouped':'phrase';
@@ -444,9 +444,60 @@ function boot(){
   try{speechSynthesis.speak(u);}catch(e){clearWordAudio();put('status','음성 재생에 실패했습니다.');}
  }
  function speak(speed){rate=speed;speakText(current()[0],speed,'phrase',null);}
+ // Japanese word-button TTS: turn the authored Hepburn reading into kana.
+ // Only word cards use this path; sentence TTS and all display strings stay intact.
+ function jaKanaReading(romaji){
+  if(typeof romaji!=='string')return null;
+  let s=romaji.toLowerCase().trim()
+    .replace(/[āâ]/g,'aa').replace(/[īî]/g,'ii').replace(/[ūû]/g,'uu')
+    .replace(/[ēê]/g,'ee').replace(/[ōô]/g,'ou')
+    .replace(/[’‘]/g,"'").replace(/([bcdfghjklmpqrstvwxyz])-\1/g,'$1$1').replace(/[.,!?。！？、…]/g,' ');
+  if(!s||/[^a-z\s'\-]/.test(s))return null;
+  const row={k:'かきくけこ',s:'さしすせそ',t:'たちつてと',n:'なにぬねの',h:'はひふへほ',m:'まみむめも',r:'らりるれろ',g:'がぎぐげご',z:'ざじずぜぞ',d:'だぢづでど',b:'ばびぶべぼ',p:'ぱぴぷぺぽ'};
+  const base={a:'あ',i:'い',u:'う',e:'え',o:'お',ya:'や',yu:'ゆ',yo:'よ',wa:'わ',wo:'を',wi:'うぃ',we:'うぇ',ye:'いぇ',
+    shi:'し',chi:'ち',tsu:'つ',fu:'ふ',ji:'じ',si:'すぃ',ti:'てぃ',tu:'とぅ',di:'でぃ',du:'どぅ',
+    she:'しぇ',che:'ちぇ',je:'じぇ',ja:'じゃ',ju:'じゅ',jo:'じょ',sha:'しゃ',shu:'しゅ',sho:'しょ',cha:'ちゃ',chu:'ちゅ',cho:'ちょ',
+    fa:'ふぁ',fi:'ふぃ',fe:'ふぇ',fo:'ふぉ',fyu:'ふゅ',tsa:'つぁ',tsi:'つぃ',tse:'つぇ',tso:'つぉ',
+    va:'ゔぁ',vi:'ゔぃ',vu:'ゔ',ve:'ゔぇ',vo:'ゔぉ'};
+  for(const [cons,letters] of Object.entries(row)){
+   ['a','i','u','e','o'].forEach((v,i)=>{if(!base[cons+v])base[cons+v]=letters[i];});
+  }
+  for(const [cons,stem] of Object.entries({ky:'き',sh:'し',ch:'ち',ny:'に',hy:'ひ',my:'み',ry:'り',gy:'ぎ',j:'じ',by:'び',py:'ぴ',dy:'ぢ',ty:'ち',sy:'し',zy:'じ'})){
+   ['a','u','o'].forEach((v,i)=>{if(!base[cons+v])base[cons+v]=stem+['ゃ','ゅ','ょ'][i];});
+  }
+  const chunks=[];
+  for(let i=0;i<s.length;){
+   const c=s[i],next=s[i+1]||'';
+   if(c===' '||c==='-'){if(chunks.length&&chunks[chunks.length-1]!==' ')chunks.push(' ');i++;continue;}
+   if(c==="'"){i++;continue;}
+   if(c==='n'&&(next==="'"||next==='n'||!next||(!/[aiueoy]/.test(next)))){
+    chunks.push('ん');i+=next==='n'?1:(next==="'"?2:1);continue;
+   }
+   if(c===next&&/[bcdfghjklmpqrstvwxyz]/.test(c)&&c!=='n'){
+    chunks.push('っ');i++;continue;
+   }
+   if(c==='t'&&s.slice(i+1,i+3)==='ch'){chunks.push('っ');i++;continue;}
+   let kana=null,advance=0;
+   for(let span=3;span>=1;span--){if(base[s.slice(i,i+span)]){kana=base[s.slice(i,i+span)];advance=span;break;}}
+   if(!kana)return null;
+   chunks.push(kana);i+=advance;
+  }
+  return chunks.join('').trim()||null;
+ }
+ function jaWordSpeech(script,reading){
+  // Leave kana/Latin text to the voice itself. Disambiguate only Han-containing words.
+  if(lang!=='ja'||!/[\u3400-\u9fff々〆ヶ]/u.test(script))return script;
+  // Hepburn macrons cannot distinguish おう from おお or とう from とお.
+  const special={'大通り':'おおどおり','大きい':'おおきい','大雨':'おおあめ',
+    '大幅':'おおはば','通り':'とおり','通って':'とおって','通れます':'とおれます'};
+  return special[script]||jaKanaReading(reading)||script;
+ }
+
  function wordClick(event,container){
   const button=event.target.closest('button[data-bvq-word]');if(!button||!container.contains(button))return;
-  speakText(button.dataset.bvqWord,0.86,'word',button);
+  const original=button.dataset.bvqWord;
+  const speech=jaWordSpeech(original,button.dataset.bvqReading||'');
+  speakText(speech,0.86,'word',button);
  }
  $('vocab-list').addEventListener('click',e=>wordClick(e,$('vocab-list')));
  $('aligned-chips').addEventListener('click',e=>wordClick(e,$('aligned-chips')));
