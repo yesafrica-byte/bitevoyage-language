@@ -169,7 +169,20 @@ function boot(){
   let occluded=0;
   const selectors='#navbar-iframe,header,[role="banner"],.header-outer,.header-wrapper,.centered-top-container,.tabs-outer,.sticky-header,.fixed-header';
   const seen=new Set();
-  document.querySelectorAll(selectors).forEach(node=>{
+  // Blogger themes can wrap the visible top bar in an unnamed sticky/fixed node.
+  // Inspect nodes actually occupying the top of the layout viewport as well.
+  const candidates=[...document.querySelectorAll(selectors)];
+  if(typeof document.elementFromPoint==='function'){
+   const mid=Math.max(0,Math.floor((window.innerWidth||document.documentElement.clientWidth)/2));
+   for(const y of [3,24,48]){
+    let node=document.elementFromPoint(mid,y);
+    while(node&&node!==document.documentElement&&node!==document.body){
+     if(!root.contains(node))candidates.push(node);
+     node=node.parentElement;
+    }
+   }
+  }
+  candidates.forEach(node=>{
    if(seen.has(node)||root.contains(node))return;
    seen.add(node);
    const style=window.getComputedStyle(node);
@@ -186,17 +199,68 @@ function boot(){
   });
   return Math.round(Math.max(0,occluded)+gap);
  }
+ // V6.3 r6: Chrome's collapsing toolbar and Blogger's sliding header may change
+ // *while* smooth scroll is running. Measure again after landing, but never fight
+ // an actual user scroll. The base STEP 01-04 spacing remains 14/18/22px.
+ let landingGeneration=0,landingCleanup=null;
+ function cancelLandingCorrection(){
+  landingGeneration++;
+  if(landingCleanup){landingCleanup();landingCleanup=null;}
+ }
  function scrollToSection(el,instant=false){
   const panel=targetPanel(el);
   if(!panel)return;
+  cancelLandingCorrection();
+  const generation=landingGeneration;
   const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // Inline margin beats the legacy #bvq3-lesson CSS value without editing Blogger.
+  const timers=[];
+  const setTimer=(fn,ms)=>{const h=window.setTimeout(fn,ms);timers.push(h);};
+  let corrections=0;
+  const begun=Date.now();
+  function alignAfterLanding(){
+   if(generation!==landingGeneration||!panel.isConnected)return;
+   const inset=topInset(panel);
+   panel.style.scrollMarginTop=inset+'px';
+   const drift=panel.getBoundingClientRect().top-inset;
+   if(Math.abs(drift)<=7||corrections>=3)return;
+   // This is an instant *small correction* after the original smooth movement,
+   // not another animation that can repeatedly show/hide the mobile chrome.
+   corrections++;
+   const y=Math.max(0,window.scrollY+drift);
+   try{window.scrollTo({top:y,behavior:'instant'});}catch(e){window.scrollTo(0,y);}
+  }
+  function scheduleAfterChange(){
+   if(generation!==landingGeneration)return;
+   const delay=Math.max(140,750-(Date.now()-begun));
+   setTimer(alignAfterLanding,delay);
+  }
+  const onViewportChange=()=>scheduleAfterChange();
+  const onScrollEnd=()=>scheduleAfterChange();
+  const vv=window.visualViewport;
+  window.addEventListener('resize',onViewportChange,{passive:true});
+  if(vv)vv.addEventListener('resize',onViewportChange,{passive:true});
+  // `scrollend` reports completion of Chrome smooth scroll where supported.
+  window.addEventListener('scrollend',onScrollEnd,{passive:true});
+  landingCleanup=()=>{
+   timers.forEach(h=>window.clearTimeout(h));
+   window.removeEventListener('resize',onViewportChange);
+   if(vv)vv.removeEventListener('resize',onViewportChange);
+   window.removeEventListener('scrollend',onScrollEnd);
+  };
+  // The first pass uses the currently visible Blogger header. Subsequent
+  // passes catch its slide-in/out transition and Android browser chrome resize.
   const run=()=>{
+   if(generation!==landingGeneration)return;
    panel.style.scrollMarginTop=topInset(panel)+'px';
    panel.scrollIntoView({behavior:(instant||reduce)?'auto':'smooth',block:'start'});
   };
   if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(run);else run();
+  [860,1320,1920,2530].forEach(ms=>setTimer(alignAfterLanding,ms));
+  setTimer(()=>{if(generation===landingGeneration)cancelLandingCorrection();},2850);
  }
+ // Cancel a pending automatic correction when the learner manually interacts.
+ ['wheel','touchstart','pointerdown','keydown'].forEach(type=>
+  window.addEventListener(type,cancelLandingCorrection,{passive:true}));
  // V6.3 r5: STEP 01 alone also supports the #bvq-start URL anchor.
  // Blogger may insert ads/resize its surrounding layout AFTER that initial anchor jump.
  // STEP 02-04 already scroll after user selection, so their approved offsets stay unchanged.

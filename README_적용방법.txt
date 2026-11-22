@@ -1,34 +1,33 @@
-BiteVoyage Premium V6.3 — STEP 01 상단 여백 보정 (r5)
+BiteVoyage Premium V6.3 · 동적 상단바 보정 r6
 
-현상
-- STEP 01의 ‘무료 학습 시작하기’ 또는 공유된 #bvq-start 링크는 페이지가 처음 표시될 때도 이동합니다.
-- Blogger 테마, 광고, 웹폰트 등의 레이아웃 로딩이 뒤늦게 끝나면 첫 이동 위치가 달라질 수 있습니다.
-- STEP 02, 03, 04는 사용자 선택 후 이동하므로 상대적으로 정확합니다.
-- 라이브 기기의 정확한 원인은 화면을 직접 측정할 수 없어 '유력한 원인'으로 판단합니다.
+증상
+- Android Chrome 주소창이 나타났다 사라지면 웹페이지가 사용할 수 있는 화면 높이가 달라집니다.
+- Blogger 'Bite Voyage: Travel, Food & Vibes' 상단바 역시 스크롤 방향에 따라 열리고 닫힙니다.
+- r5는 스크롤 시작 시점에 상단 높이를 계산하기 때문에 두 막대의 상태가 이동 중 변경되면 STEP 제목이 가려지거나 빈 공간이 생길 수 있습니다.
 
-수정 내용
-- STEP 01 이동 직후 페이지 레이아웃이 늦게 변경될 때만 실제 위치를 재측정해 상단 간격을 보정.
-- STEP 02, 03, 04의 기존 상단 여백 계산식은 보존.
-- 사용자가 직접 스크롤하거나 언어/상황/난이도를 선택하면 STEP 01의 지연 보정을 즉시 취소.
-- 기존 1,920개 문장, 학습기록(localStorage), 발음, 퀴즈, PWA, 공유 기능 변경 없음.
+이번 수정
+- STEP 01~04의 기본 상단 여백 14px(모바일), 18px(태블릿), 22px(PC)은 유지합니다.
+- 화면 상단을 실제로 가리는 Blogger 고정/스티키 요소를 자동 탐지합니다.
+- 이동 완료 무렵 실제 높이를 재측정하고 오차가 7px을 초과할 경우에만 최대 3회 미세 보정합니다.
+- visualViewport.resize / resize / scrollend를 짧은 기간 관찰해 Chrome 주소창과 Blogger 바가 움직이는 경우를 고려합니다.
+- 사용자가 직접 화면을 만지거나 스크롤하면 자동 보정을 즉시 중단합니다.
+- 직접 터치 스크롤 중에 억지로 위치를 유지하거나 브라우저 바 자체를 숨기지는 않습니다.
 
-GitHub 업로드
-1) github.com/yesafrica-byte/bitevoyage-language 에서 현재 main 브랜치 파일 백업.
-2) bvq62-engine.js 를 같은 이름으로 덮어쓰기(필수).
-3) index.html 을 덮어쓰기(GitHub Pages 자체 테스트용, 권장).
-4) Commit changes → Pages 배포 확인.
-5) bvq62-data.js, install/launch/sw, manifest, 아이콘은 수정하지 않음.
+GitHub 수정
+1. 현재 repository 파일을 백업합니다.
+2. bvq62-engine.js 파일을 같은 이름으로 덮어쓰기 합니다 (필수).
+3. index.html을 덮어쓰기 합니다 (GitHub Pages 테스트 페이지용, 권장).
+4. Commit 후 GitHub Pages 배포를 확인합니다.
+5. bvq62-data.js 및 PWA 설치 관련 파일은 변경하지 않습니다.
 
-Blogger 적용 — 전체 HTML 변경 불필요
-기존 JS 줄:
-<script defer src="https://yesafrica-byte.github.io/bitevoyage-language/bvq62-engine.js?v=bvq63-stepoffset-20261122-r4"></script>
+Blogger 수정 (본문 전체 교체 필요 없음)
+HTML 보기에서 GitHub의 bvq62-engine.js를 불러오는 <script> 한 줄을 찾습니다.
+이전: ?v=bvq63-step1-gapfix-20261122-r5
+수정: ?v=bvq63-dynamicheader-20261122-r6
+※ 데이터 JS 호출 주소는 변경하지 않습니다. 파일명도 그대로 유지합니다.
+※ 적용 후 크롬에서 언어/상황/난이도 탭 이동을 확인하고, 주소창 표시/숨김 양쪽을 시험합니다.
 
-변경 JS 줄:
-<script defer src="https://yesafrica-byte.github.io/bitevoyage-language/bvq62-engine.js?v=bvq63-step1-gapfix-20261122-r5"></script>
-
-주의
-- ?v= 뒤 값만 변경합니다. bvq62-engine.js 파일명 유지.
-- DATA 스크립트의 ?v=bvq63-20261122-quality-r1 은 수정하지 않습니다.
-- 전체 본문 교체보다 위의 한 줄 변경을 권장합니다.
-- 2~4단계 기존 화면 상단 간격 14/18/22px(+고정메뉴 높이) 유지.
-- 적용 후 모바일 시크릿 모드에서 '무료 학습 시작하기', 공유 링크 #bvq-start, STEP 1→2→3→4 점검.
+검증 범위 및 한계
+- 로컬 Chromium에서 1~4 STEP 정상 이동 및 동적 고정 헤더 출현/숨김에 따른 자동 정렬을 검사합니다.
+- 실제 Android Chrome의 시스템 UI 변화는 웹페이지가 완전히 통제할 수 없어 모든 테마/기기에서 픽셀 단위 고정은 보장하지 않습니다.
+- 원문 1,920개, XP/학습진도, 발음·퀴즈, 공유, 설치 및 기초 디자인 데이터는 변경하지 않습니다.
