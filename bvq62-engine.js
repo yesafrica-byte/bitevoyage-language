@@ -159,12 +159,23 @@ function boot(){
   $('scenes').querySelectorAll('[data-bvq-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bvqChoice===scene)));levelState();
  }
  function filterScenes(){const q=decode($('search').value).trim().toLowerCase();$('scenes').querySelectorAll('[data-bvq-choice]').forEach(b=>{const label=decode(b.textContent).toLowerCase();b.hidden=!!q&&!label.includes(q);});}
- function scrollToLesson(){
-  const el=$('lesson');if(!el)return;
+ // V6.3 step-flow patch: scenario -> STEP 03; difficulty -> STEP 04.
+ // "Continue" and "Review mistakes" still jump directly to STEP 04.
+ function scrollToSection(el){
+  if(!el)return;
   const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const run=()=>el.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
   if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(run);else run();
  }
+ function scrollToLevels(){
+  const controls=$('levels');
+  const section=controls&&controls.closest('.bv-panel');
+  if(!section)return;
+  // The existing lesson has the same offset in Blogger CSS.
+  section.style.scrollMarginTop=window.matchMedia&&window.matchMedia('(max-width: 600px)').matches?'76px':'86px';
+  scrollToSection(section);
+ }
+ function scrollToLesson(){scrollToSection($('lesson'));}
  function reviewCandidates(){return rows().map((_,i)=>i).filter(i=>{
   const key=lang+'|'+scene+'|'+(level==='beginner'?i:level+'|'+i);
   return !!progress.wrong[key]&&!progress.done[key];
@@ -262,8 +273,8 @@ function boot(){
   const pending=reviewCandidates().length;$('review').textContent=pending?'↺ 오답 복습 ('+pending+')':'↺ 오답 복습';
  }
  $('languages').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!$('languages').contains(b))return;const next=b.dataset.bvqChoice;if(!LANGS[next])return;stop();lang=next;idx=0;reviewOnly=false;$('review-note').textContent='';render();});
- $('scenes').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!DATA[lang][b.dataset.bvqChoice])return;stop();scene=b.dataset.bvqChoice;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToLesson();});
- $('levels').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-level]');if(!b)return;const next=b.dataset.bvqLevel;if(!LEVELS.includes(next))return;stop();level=next;idx=0;reviewOnly=false;$('review-note').textContent='';render();});
+ $('scenes').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!DATA[lang][b.dataset.bvqChoice])return;stop();scene=b.dataset.bvqChoice;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToLevels();});
+ $('levels').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-level]');if(!b)return;const next=b.dataset.bvqLevel;if(!LEVELS.includes(next))return;stop();level=next;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToLesson();});
  $('continue').addEventListener('click',()=>{restore();reviewOnly=false;stop();$('review-note').textContent='';render();scrollToLesson();});
  $('review').addEventListener('click',()=>{
   const indices=reviewCandidates();

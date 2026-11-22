@@ -1,32 +1,38 @@
-# BiteVoyage V6.2 · 다양한 휴대전화용 설치 호환성 패치
+BiteVoyage V6.3 STEP 2 → STEP 3 → STEP 4 최소 패치
 
-## 왜 어제 설치되고 오늘 다른 휴대전화에서는 안 될까요?
-- PWA는 사용자가 동의해야만 설치됩니다. 자동/무단 설치는 불가능합니다.
-- 직접 설치창은 Chrome이 설치 가능 상태를 판정하고 `beforeinstallprompt` 신호를 보낼 때에만 열 수 있습니다.
-- 내장 브라우저(네이버·카카오·일부 앱), 삼성 인터넷, iOS 등에서는 설치창 호출 방식이 다릅니다.
-- 이미 설치되었거나, 기기별 설치 자격 검사 및 이용 이력에 따라 설치창이 나타나지 않을 수 있습니다.
-- 기존 launch.html은 로딩 즉시 다른 도메인(Blogger)으로 이동했습니다. 일부 환경에서 PWA 시작 주소 검사에 불리할 가능성이 있어 개선했습니다. 이 부분이 실제 원인이었는지는 미확정입니다.
+[기존 기능 보존]
+- Github 파일명 유지: bvq62-engine.js
+- 데이터 파일(bvq62-data.js), 1,920개 표현, 발음, KEY VOCAB, 음성, 퀴즈, XP, 오답 기록, 공유, PWA 파일은 변경하지 않음
+- 마지막 위치로 이어서 학습, 오답 복습 버튼은 이전처럼 STEP 04에 직접 이동
+- 움직임 줄이기(prefers-reduced-motion) 설정 존중
+- 데이터 버전/빌드 ID(6.3.0 / bvq63-20261122-quality-r1) 유지
 
-## GitHub에서 바꿀 파일: 아래 3개 이름 그대로
-1. install.html
-2. launch.html
-3. sw.js
+[변경 후 동선]
+STEP 02 여행 상황 선택 -> STEP 03 난이도 선택 화면으로 부드럽게 이동
+STEP 03 초급/중급/고급 클릭 -> STEP 04 학습 카드로 부드럽게 이동
 
-- 저장소: https://github.com/yesafrica-byte/bitevoyage-language
-- `main` 최상위 폴더에서 같은 이름으로 덮어쓰기(Commit)
-- 다른 JS/데이터/아이콘/manifest 파일은 변경하지 마세요.
-- Blogger 본문 전체와 해당 게시글 URL도 교체하지 마세요.
+[권장 GitHub 적용]
+1. 현재 저장소의 bvq62-engine.js 와 index.html 을 백업
+2. bvq62-engine.js 를 같은 파일명으로 덮어쓰기 후 Commit
+3. GitHub Pages 자체 테스트 화면의 캐시도 피하려면 index.html 도 같은 이름으로 덮어쓰기
+   (index.html 내용은 동일하며, 엔진 쿼리 문자열 한 곳만 변경함)
+4. bvq62-data.js 및 나머지 설치 파일은 건드리지 않음
 
-## 배포 확인
-1. GitHub Actions의 Pages 배포가 성공했는지 확인합니다.
-2. 휴대전화 Chrome에서 https://yesafrica-byte.github.io/bitevoyage-language/install.html 을 직접 엽니다.
-3. `BV 아이콘 설치`를 누릅니다. 시스템 설치 승인창이 나타나면 승인하고 아이콘을 확인합니다.
-4. 승인창이 안 뜨면 크롬 오른쪽 위 ⋮ 메뉴 → 앱 설치/홈 화면에 추가를 이용합니다.
-5. 문제를 겪는 기기에서 https://yesafrica-byte.github.io/bitevoyage-language/install.html?debug=1 을 열면 브라우저 종류/설치 이벤트 수신/서비스 워커 상태를 자체 표시합니다. 진단 내용은 서버로 전송하지 않습니다.
+[Blogger 본문 — 전체 교체 필요 없음]
+HTML 보기에서 다음 엔진 스크립트 주소를 검색합니다.
+기존: https://yesafrica-byte.github.io/bitevoyage-language/bvq62-engine.js?v=bvq63-20261122-quality-r1
+변경: https://yesafrica-byte.github.io/bitevoyage-language/bvq62-engine.js?v=bvq63-stepflow-20261122-r2
+수정 대상은 엔진 JS URL의 ?v= 뒷부분만! 데이터 JS URL은 그대로 유지.
+현재 본문이 다른 ?v= 값이라면 'bvq62-engine.js?v='로 검색해 그 주소 한 곳만 새 값으로 변경.
 
-## 중요한 제약
-- 버튼 1회로 모든 기기에 설치창을 강제 표시할 방법은 없습니다.
-- Blogger와 GitHub Pages는 다른 도메인이므로 설치한 BV 앱이 Blogger로 이동할 때 브라우저 창으로 열릴 수 있습니다.
-- 이 패치는 1,920개 표현·음성·퀴즈·XP 및 데이터 구조를 건드리지 않습니다.
-- 기존 설치자도 같은 manifest ID와 start_url로 기존 앱 정체성을 유지합니다.
-- 로컬 파일 문법/정합성 테스트로 설치 성공을 보장할 수 없습니다. 여러 실제 기기에서 배포 후 시험해야 합니다.
+본 전체 HTML을 교체하고 싶은 경우에만 BLOGGER_FULL_REPLACE_OPTIONAL.html 을 사용하세요.
+이 파일은 기준 V6.3 Blogger HTML에서 '엔진 URL 한 곳'만 변경한 선택 옵션이며
+최근에 사용자가 본문에 직접 추가한 다른 커스텀 수정은 반영되지 않을 수 있습니다.
+따라서 한 줄 수정이 권장됩니다.
+
+[배포 검증]
+- STEP 02에서 '호텔·숙소' 누르면 STEP 03 난이도 영역 표시
+- STEP 03에서 '고급' 누르면 STEP 04, 호텔·해당언어·고급 / LESSON 01/08
+- '이어서 학습', '오답 복습'은 이전처럼 STEP 04 직접 이동
+- 시크릿 창/강력 새로고침으로 확인
+- 페이지가 로딩 안 되면 Blogger의 data.js 와 engine.js 쿼리 버전 및 GitHub 업로드 커밋 확인
