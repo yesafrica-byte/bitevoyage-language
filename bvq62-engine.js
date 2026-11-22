@@ -159,23 +159,56 @@ function boot(){
   $('scenes').querySelectorAll('[data-bvq-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bvqChoice===scene)));levelState();
  }
  function filterScenes(){const q=decode($('search').value).trim().toLowerCase();$('scenes').querySelectorAll('[data-bvq-choice]').forEach(b=>{const label=decode(b.textContent).toLowerCase();b.hidden=!!q&&!label.includes(q);});}
- // V6.3 step-flow patch: scenario -> STEP 03; difficulty -> STEP 04.
- // "Continue" and "Review mistakes" still jump directly to STEP 04.
- function scrollToSection(el){
-  if(!el)return;
-  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const run=()=>el.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+ // V6.3 step-alignment r4: consistent, responsive landing for STEP 01–04.
+ // Use the measured TOP obstruction, not a blanket 76/86px blank space.
+ // The embedded learning area is NOT itself a fixed header.
+ function targetPanel(el){return el?(el.closest('.bv-panel')||el):null;}
+ function topInset(panel){
+  const w=window.innerWidth||document.documentElement.clientWidth;
+  const gap=w<=600?14:w<=1024?18:22;
+  let occluded=0;
+  const selectors='#navbar-iframe,header,[role="banner"],.header-outer,.header-wrapper,.centered-top-container,.tabs-outer,.sticky-header,.fixed-header';
+  const seen=new Set();
+  document.querySelectorAll(selectors).forEach(node=>{
+   if(seen.has(node)||root.contains(node))return;
+   seen.add(node);
+   const style=window.getComputedStyle(node);
+   if(style.position!=='fixed'&&style.position!=='sticky')return;
+   const rect=node.getBoundingClientRect();
+   if(rect.width<24||rect.height<8)return;
+   const max=Math.min(200,Math.round(window.innerHeight*.34));
+   const atTop=rect.top<=20&&rect.bottom>0;
+   // A sticky nav that has not yet reached the top may still cover the target.
+   const stickyLater=style.position==='sticky'&&rect.top>20&&rect.top<panel.getBoundingClientRect().top&&parseFloat(style.top||'0')<=24;
+   if(!atTop&&!stickyLater)return;
+   const expected=stickyLater?Math.max(0,parseFloat(style.top)||0)+rect.height:rect.bottom;
+   if(expected>0&&expected<=max)occluded=Math.max(occluded,expected);
+  });
+  return Math.round(Math.max(0,occluded)+gap);
+ }
+ function scrollToSection(el,instant=false){
+  const panel=targetPanel(el);
+  if(!panel)return;
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Inline margin beats the legacy #bvq3-lesson CSS value without editing Blogger.
+  const run=()=>{
+   panel.style.scrollMarginTop=topInset(panel)+'px';
+   panel.scrollIntoView({behavior:(instant||reduce)?'auto':'smooth',block:'start'});
+  };
   if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(run);else run();
  }
- function scrollToLevels(){
-  const controls=$('levels');
-  const section=controls&&controls.closest('.bv-panel');
-  if(!section)return;
-  // The existing lesson has the same offset in Blogger CSS.
-  section.style.scrollMarginTop=window.matchMedia&&window.matchMedia('(max-width: 600px)').matches?'76px':'86px';
-  scrollToSection(section);
- }
+ function scrollToScenes(){scrollToSection($('scenes'));}
+ function scrollToLevels(){scrollToSection($('levels'));}
  function scrollToLesson(){scrollToSection($('lesson'));}
+ // The prominent hero CTA and direct #bvq-start links follow the same top offset.
+ const startSection=document.getElementById('bvq-start');
+ root.querySelectorAll('a[href="#bvq-start"]').forEach(link=>link.addEventListener('click',event=>{
+  event.preventDefault();
+  if(window.history&&history.replaceState)history.replaceState(null,'','#bvq-start');
+  scrollToSection(startSection);
+ }));
+ // Apply the same landing margin for any native in-page anchor navigation.
+ if(startSection)startSection.style.scrollMarginTop=topInset(startSection)+'px';
  function reviewCandidates(){return rows().map((_,i)=>i).filter(i=>{
   const key=lang+'|'+scene+'|'+(level==='beginner'?i:level+'|'+i);
   return !!progress.wrong[key]&&!progress.done[key];
@@ -272,8 +305,8 @@ function boot(){
   $('continue').textContent='↗ 이어서 학습';
   const pending=reviewCandidates().length;$('review').textContent=pending?'↺ 오답 복습 ('+pending+')':'↺ 오답 복습';
  }
- $('languages').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!$('languages').contains(b))return;const next=b.dataset.bvqChoice;if(!LANGS[next])return;stop();lang=next;idx=0;reviewOnly=false;$('review-note').textContent='';render();});
- $('scenes').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!DATA[lang][b.dataset.bvqChoice])return;stop();scene=b.dataset.bvqChoice;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToLevels();});
+ $('languages').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!$('languages').contains(b))return;const next=b.dataset.bvqChoice;if(!LANGS[next])return;stop();lang=next;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToScenes();});
+ $('scenes').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-choice]');if(!b||!DATA[lang][b.dataset.bvqChoice])return;if(document.activeElement===$('search'))$('search').blur();stop();scene=b.dataset.bvqChoice;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToLevels();});
  $('levels').addEventListener('click',e=>{const b=e.target.closest('button[data-bvq-level]');if(!b)return;const next=b.dataset.bvqLevel;if(!LEVELS.includes(next))return;stop();level=next;idx=0;reviewOnly=false;$('review-note').textContent='';render();scrollToLesson();});
  $('continue').addEventListener('click',()=>{restore();reviewOnly=false;stop();$('review-note').textContent='';render();scrollToLesson();});
  $('review').addEventListener('click',()=>{
@@ -396,7 +429,7 @@ function boot(){
    }catch(e){openInstallGateway();}
   }else openInstallGateway();
  });
- restore();syncSound();render();filterScenes();status('✓ V6.3 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
+ restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToSection(startSection,true);status('✓ V6.3 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
  if(document.readyState==='complete')initAds();else window.addEventListener('load',initAds,{once:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
