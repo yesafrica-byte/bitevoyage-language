@@ -64,20 +64,95 @@ function boot(){
  function levelState(){
   $('levels').querySelectorAll('[data-bvq-level]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bvqLevel===level)));
  }
+ // KEY VOCAB V6.2: longest non-overlapping lexical units; use authored CJK segment boundaries.
+ // No changes to phrase lists, localStorage keys, TTS controller, quiz, SEO or PWA.
+ const EXTRA_VOCAB={
+  ja:[['風邪薬','kazegusuri','감기약'],['高速道路','kōsoku dōro','고속도로']],
+  zh:[['我们','wǒmen','우리(들)'],['感冒药','gǎnmàoyào','감기약']]
+ };
+ function vocabBoundaries(parts){
+  const b=new Set([0]);let offset=0;
+  for(const pair of parts){
+   const s=String(pair[0]||'');
+   const prefix=s.match(/^[^\p{L}\p{N}]+/u),suffix=s.match(/[^\p{L}\p{N}]+$/u);
+   b.add(offset+(prefix?prefix[0].length:0));
+   b.add(offset+s.length-(suffix?suffix[0].length:0));
+   offset+=s.length;b.add(offset);
+  }
+  return b;
+ }
+ function vocabMatches(phrase,term,locale,bounds){
+  if(!term)return [];
+  const full=phrase.toLowerCase(),needle=term.toLowerCase(),results=[];
+  const isWord=c=>!!c&&/[\p{L}\p{N}]/u.test(c);
+  let pos=0;
+  while((pos=full.indexOf(needle,pos))!==-1){
+   const finish=pos+term.length;
+   let valid=false;
+   if(locale==='ja'||locale==='zh'){
+    const fullWord=bounds.has(pos)&&bounds.has(finish);
+    // For longer components, tolerate compound nouns / inflected stems anchored at
+    // an authored segment edge. Never allow a lone kanji inside a longer word:
+    // e.g. 今 inside 今日, 风 inside 风邪薬, 我 inside 我们.
+    valid=fullWord||(term.length>=2&&(bounds.has(pos)||bounds.has(finish)));
+   }else if(locale==='en'){
+    valid=(!pos||!isWord(phrase[pos-1]))&&
+          (finish===phrase.length||!isWord(phrase[finish]));
+   }else{
+    // Hangul is agglutinative. A root at an eojeol start may have particles
+    // attached (e.g. 날씨 + 가). Internal substrings are not accepted by default.
+    valid=(!pos||!isWord(phrase[pos-1]))&&
+          (finish===phrase.length||!isWord(phrase[finish])||term.length>=2);
+   }
+   if(valid)results.push({start:pos,end:finish});
+   pos+=Math.max(1,term.length);
+  }
+  return results;
+ }
+ function selectVocab(phrase,locale,parts){
+  const vocab=[...(EXTRA_VOCAB[locale]||[]),...(cfg.vocab?.[locale]||[])];
+  const bounds=(locale==='ja'||locale==='zh')?vocabBoundaries(parts||[]):null;
+  function getCandidates(allowKoreanFallback){
+   const a=[];
+   for(let rank=0;rank<vocab.length;rank++){
+    const entry=vocab[rank];if(!Array.isArray(entry)||!entry[0])continue;
+    let matches=vocabMatches(phrase,String(entry[0]),locale,bounds);
+    if(!matches.length&&locale==='ko'&&allowKoreanFallback){
+     // Preserve legacy valid Korean suffix/compound vocabulary coverage when no
+     // whole-word entries exist; longest-overlap still suppresses duplicates.
+     const p=phrase.toLowerCase().indexOf(String(entry[0]).toLowerCase());
+     if(p>=0)matches=[{start:p,end:p+String(entry[0]).length}];
+    }
+    if(matches.length)a.push({entry,rank,...matches[0]});
+   }
+   return a;
+  }
+  let candidates=getCandidates(false);
+  if(!candidates.length&&locale==='ko')candidates=getCandidates(true);
+  // Prefer the longest meaningful expression in overlapping spans;
+  // short nested fragments cannot crowd out the whole word.
+  candidates.sort((a,b)=>(b.end-b.start)-(a.end-a.start)||a.rank-b.rank||a.start-b.start);
+  const chosen=[];
+  for(const c of candidates){
+   if(chosen.some(x=>!(x.end<=c.start||c.end<=x.start)))continue;
+   chosen.push(c);if(chosen.length>=4)break;
+  }
+  chosen.sort((a,b)=>a.start-b.start);
+  return chosen.map(c=>c.entry);
+ }
  function renderVocab(){
   const list=$('vocab-list');list.replaceChildren();
-  const phrase=decode(current()[0]);const chosen=[];const vocab=cfg.vocab?.[lang]||[];
-  for(const entry of vocab){if((lang==='en'?new RegExp('(^|[^a-z])'+entry[0].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[^a-z])','i').test(phrase):phrase.toLowerCase().includes(entry[0].toLowerCase()))&&!chosen.some(x=>x[0]===entry[0]))chosen.push(entry);if(chosen.length===4)break;}
+  const chosen=selectVocab(decode(current()[0]),lang,current()[3]);
   for(const [term,pron,description] of chosen){
-    const chip=make('button','bv-word-note bv-word-audio');chip.type='button';
-    chip.dataset.bvqWord=term;chip.setAttribute('aria-label',term+' 단어 발음 듣기');chip.setAttribute('aria-pressed','false');
-    chip.title=term+' · 눌러서 해당 단어 발음 듣기';
-    chip.append(make('strong','',term),make('small','',pron),make('span','',description),make('em','bv-word-play-hint','🔊 터치하여 단어 듣기'));
-    list.append(chip);
+   const chip=make('button','bv-word-note bv-word-audio');chip.type='button';
+   chip.dataset.bvqWord=term;chip.setAttribute('aria-label',term+' 단어 발음 듣기');chip.setAttribute('aria-pressed','false');
+   chip.title=term+' · 눌러서 해당 단어 발음 듣기';
+   chip.append(make('strong','',term),make('small','',pron),make('span','',description),make('em','bv-word-play-hint','🔊 터치하여 단어 듣기'));
+   list.append(chip);
   }
   $('vocab-box').hidden=chosen.length===0;
  }
- 
+
  function mix(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
  function selectState(){
   $('languages').querySelectorAll('[data-bvq-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bvqChoice===lang)));
