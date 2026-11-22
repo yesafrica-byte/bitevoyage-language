@@ -1,4 +1,4 @@
-/* BiteVoyage Language Quest Premium V6.2 | 1920 expressions | clickable word audio | PWA intact */
+/* BiteVoyage Language Quest Premium V6.3 | 1920 expressions | clickable word audio | PWA intact */
 (function(){
 'use strict';
 function boot(){
@@ -8,13 +8,13 @@ function boot(){
  const $=name=>document.getElementById('bvq3-'+name);
  const warn=$('runtime-warning');
  function status(message){if(warn)warn.textContent=message;}
- if(!cfg||!cfg.langs||!cfg.scenes||!cfg.data){status('V6.2 데이터 로드 실패: GitHub Pages에 bvq62-data.js가 있는지 확인해 주세요.');return;}
+ if(!cfg||!cfg.langs||!cfg.scenes||!cfg.data){status('V6.3 데이터 로드 실패: GitHub Pages에 bvq62-data.js가 있는지 확인해 주세요.');return;}
  const supported=['en','ja','zh','ko'];
  const LEVELS=['beginner','intermediate','advanced'];
  const LEVEL_LABELS={'beginner':'초급','intermediate':'중급','advanced':'고급'};
  const EXPECTED={'beginner':16,'intermediate':8,'advanced':8};
  let total=0,readings=0,aligned=0,integrityError='';
- if(cfg.version!=='6.2.0'||cfg.build_id!=='bvq62-20261122-weather-review-r1') integrityError='데이터·엔진 버전 불일치';
+ if(cfg.version!=='6.3.0'||cfg.build_id!=='bvq63-20261122-quality-r1') integrityError='데이터·엔진 버전 불일치';
  if(!integrityError) for(const lng of supported){
   if(!cfg.data[lng]){integrityError='언어 데이터 누락: '+lng;break;}
   for(const sc of cfg.scenes.map(s=>s[0])){
@@ -34,7 +34,7 @@ function boot(){
   if(integrityError)break;
  }
  if(integrityError||total!==1920||readings!==1920||aligned!==480){
-  status('V6.2 데이터 검증 실패: '+(integrityError||('발음 '+readings+'/'+total+', 초급 정렬 '+aligned+'/480'))+' · 최신 JS 두 개를 확인해 주세요.');return;
+  status('V6.3 데이터 검증 실패: '+(integrityError||('발음 '+readings+'/'+total+', 초급 정렬 '+aligned+'/480'))+' · 최신 JS 두 개를 확인해 주세요.');return;
  }
  const required=['share-notice','languages','scenes','search','lesson-title','counter','foreign','roman','roman-label','roman-box','roman-toggle','meaning','position','prev','next','bar','answers','xp','done','status','feedback','speak','slow','repeat','stop','check','reset','segment-box','segment-line','segment-toggle','sound-toggle','aligned-chips','share-native','share-copy','share-facebook','share-x','shortcut-open','levels','vocab-box','vocab-list','level-progress','continue','review','review-note'];
  const missing=required.filter(id=>!$(id));
@@ -64,7 +64,7 @@ function boot(){
  function levelState(){
   $('levels').querySelectorAll('[data-bvq-level]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bvqLevel===level)));
  }
- // KEY VOCAB V6.2: longest non-overlapping lexical units; use authored CJK segment boundaries.
+ // KEY VOCAB V6.3: longest non-overlapping lexical units; use authored CJK segment boundaries.
  // No changes to phrase lists, localStorage keys, TTS controller, quiz, SEO or PWA.
  const EXTRA_VOCAB={
   ja:[['風邪薬','kazegusuri','감기약'],['高速道路','kōsoku dōro','고속도로']],
@@ -385,7 +385,7 @@ function boot(){
    }catch(e){openInstallGateway();}
   }else openInstallGateway();
  });
- restore();syncSound();render();filterScenes();status('✓ V6.2 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
+ restore();syncSound();render();filterScenes();status('✓ V6.3 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
  if(document.readyState==='complete')initAds();else window.addEventListener('load',initAds,{once:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
