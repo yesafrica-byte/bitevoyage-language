@@ -1,0 +1,77 @@
+{
+  "version": "6.1.0",
+  "build_id": "bvq61-20261122-premium-full-r1",
+  "counts": {
+    "en_beginner": 224,
+    "en_intermediate": 112,
+    "en_advanced": 112,
+    "ja_beginner": 224,
+    "ja_intermediate": 112,
+    "ja_advanced": 112,
+    "zh_beginner": 224,
+    "zh_intermediate": 112,
+    "zh_advanced": 112,
+    "ko_beginner": 224,
+    "ko_intermediate": 112,
+    "ko_advanced": 112
+  },
+  "total": 1792,
+  "aligned_ja_zh": 896,
+  "single_word_exceptions": [
+    [
+      "ja",
+      "everyday",
+      "beginner",
+      0,
+      "こんにちは。"
+    ],
+    [
+      "ja",
+      "everyday",
+      "beginner",
+      2,
+      "すみません。"
+    ],
+    [
+      "ja",
+      "everyday",
+      "beginner",
+      3,
+      "わかりません。"
+    ],
+    [
+      "ja",
+      "everyday",
+      "intermediate",
+      0,
+      "はじめまして。"
+    ],
+    [
+      "zh",
+      "everyday",
+      "beginner",
+      0,
+      "你好。"
+    ],
+    [
+      "zh",
+      "everyday",
+      "beginner",
+      2,
+      "不好意思。"
+    ]
+  ],
+  "files": {
+    "sw.js": 922,
+    "launch.html": 1438,
+    "manifest.webmanifest": 1205,
+    "favicon-512.png": 13897,
+    "index.html": 35194,
+    "install.html": 5022,
+    "favicon-192.png": 4302,
+    "bvq61-engine.js": 23364,
+    "bvq61-data.js": 403726,
+    "favicon-maskable-512.png": 24296,
+    ".nojekyll": 0
+  }
+}

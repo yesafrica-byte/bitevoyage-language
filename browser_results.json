@@ -1,0 +1,84 @@
+{
+  "mobile": {
+    "runtime": "✓ V6.1 연결 완료 · 총 1792개 표현 · 발음 표기 1792/1792개 · 3단계 학습",
+    "wordAudioChinese": {
+      "text": "可以",
+      "lang": "zh-CN",
+      "rate": 0.86
+    },
+    "segmentChinese": {
+      "text": "可以",
+      "lang": "zh-CN",
+      "rate": 0.86
+    },
+    "quizXP": "10",
+    "mobilePills": [
+      {
+        "height": 48,
+        "width": 145
+      },
+      {
+        "height": 48,
+        "width": 145
+      },
+      {
+        "height": 48,
+        "width": 145
+      },
+      {
+        "height": 48,
+        "width": 145
+      },
+      {
+        "height": 48,
+        "width": 145
+      },
+      {
+        "height": 48,
+        "width": 145
+      }
+    ],
+    "jsErrors": []
+  },
+  "desktop": {
+    "runtime": "✓ V6.1 연결 완료 · 총 1792개 표현 · 발음 표기 1792/1792개 · 3단계 학습",
+    "wordAudioChinese": {
+      "text": "可以",
+      "lang": "zh-CN",
+      "rate": 0.86
+    },
+    "segmentChinese": {
+      "text": "可以",
+      "lang": "zh-CN",
+      "rate": 0.86
+    },
+    "quizXP": "10",
+    "mobilePills": [
+      {
+        "height": 48,
+        "width": 353
+      },
+      {
+        "height": 48,
+        "width": 353
+      },
+      {
+        "height": 48,
+        "width": 353
+      },
+      {
+        "height": 48,
+        "width": 353
+      },
+      {
+        "height": 48,
+        "width": 353
+      },
+      {
+        "height": 48,
+        "width": 353
+      }
+    ],
+    "jsErrors": []
+  }
+}
