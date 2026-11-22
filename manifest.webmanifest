@@ -2,7 +2,7 @@
   "id": "./bvq-language-quest",
   "name": "BiteVoyage Language Quest · 여행 회화",
   "short_name": "BiteVoyage",
-  "description": "영어·일본어·중국어·한국어 총 1,792개 여행 회화. 초급·중급·고급, 발음 듣기, 핵심 단어, 퀴즈.",
+  "description": "영어·일본어·중국어·한국어 총 1,920개 여행 회화. 15개 상황, 초급·중급·고급, 단어 발음, 오답 복습과 퀴즈.",
   "lang": "ko",
   "start_url": "./launch.html",
   "scope": "./",
