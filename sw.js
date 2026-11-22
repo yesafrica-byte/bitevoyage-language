@@ -1,5 +1,5 @@
 /* BiteVoyage Language Quest PWA installer V6.2 · shell-only cache; Blogger remains online */
-const CACHE = 'bvq62-install-shell-20261122';
+const CACHE = 'bvq62-install-shell-20261122-install-compat-r3';
 const FILES = ['./install.html','./launch.html','./manifest.webmanifest','./favicon-192.png','./favicon-512.png','./favicon-maskable-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('bvq')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});

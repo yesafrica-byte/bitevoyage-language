@@ -1,0 +1,12 @@
+{
+  "manifest_id_preserved": "./bvq-language-quest",
+  "manifest_start_url_preserved": "./launch.html",
+  "changed_files": [
+    "install.html",
+    "launch.html",
+    "sw.js"
+  ],
+  "blogger_changed": false,
+  "scripts_unchanged": true,
+  "pwa_install_prompt_guaranteed": false
+}

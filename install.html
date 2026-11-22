@@ -2,85 +2,77 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0a3554">
-<title>BV 아이콘 설치 · BiteVoyage Language Quest</title>
+<title>BV 아이콘 설치 · BiteVoyage Premium</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="./favicon-192.png">
+<link rel="icon" sizes="192x192" type="image/png" href="./favicon-192.png">
 <link rel="apple-touch-icon" href="./favicon-192.png">
 <style>
-*{box-sizing:border-box}
-html{color-scheme:light}
-body{min-height:100svh;margin:0;padding:24px;font:16px/1.65 system-ui,-apple-system,"Noto Sans KR",sans-serif;background:radial-gradient(circle at 85% 0%,#c9fbf0,transparent 38%),linear-gradient(145deg,#f5fbff,#e7f2f9);color:#12334d;display:grid;place-items:center}
-main{width:min(100%,490px);background:#fff;border:1px solid #d3e5ea;border-radius:28px;padding:clamp(24px,5vw,42px);box-shadow:0 18px 52px rgba(5,55,89,.10)}
-.brand{display:flex;align-items:center;gap:15px}.brand img{width:74px;height:74px;border-radius:20px;box-shadow:0 12px 30px #0941561a}
-.eyebrow{font-size:12px;font-weight:850;letter-spacing:.11em;color:#08767b}
-h1{margin:8px 0 0;font-size:clamp(23px,6vw,30px);line-height:1.3;color:#102f4a}
-p{color:#536d7d;margin:19px 0}
-button,.link{display:flex;justify-content:center;align-items:center;width:100%;border-radius:999px;min-height:52px;text-decoration:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:800;line-height:1.4}
-button{background:linear-gradient(115deg,#036c88,#087e80);color:#fff;border:0;box-shadow:0 9px 20px #007c7a20;font-family:inherit;font-size:17px;font-weight:850}
-button:focus-visible,.link:focus-visible{outline:3px solid #f7bb46;outline-offset:3px}
-.link{color:#16415d;border:1px solid #c8dce6;background:#f5fbfe;margin-top:10px;font-family:inherit;font-size:16px;font-weight:800}
-#status{min-height:24px;font-size:13px;font-weight:700;color:#146f72;margin:13px 0 0}
-#note{display:none;padding:14px 16px;margin-top:12px;border-radius:16px;font-size:13px;color:#465f70;background:#edf7fa;line-height:1.7}
-#note.show{display:block}
-.small{font-size:13px;line-height:1.7;color:#6c7f8b}
-.divider{height:1px;background:#e5eef3;margin:22px 0}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+*{box-sizing:border-box}html{color-scheme:light}body{min-height:100svh;margin:0;padding:20px;font:16px/1.65 system-ui,-apple-system,"Noto Sans KR",sans-serif;background:radial-gradient(circle at 87% 0%,#c9faf0,transparent 39%),linear-gradient(145deg,#f5fbff,#e6f1f8);color:#10334f;display:grid;place-items:center}
+main{width:min(100%,490px);background:#fff;border:1px solid #d3e5ea;border-radius:26px;padding:clamp(22px,5vw,40px);box-shadow:0 19px 54px #08355017}.brand{display:flex;align-items:center;gap:15px}.brand img{width:74px;height:74px;border-radius:20px}.eyebrow{font-weight:850;font-size:12px;letter-spacing:.11em;color:#057578}h1{margin:7px 0 0;font-size:clamp(23px,6vw,31px);line-height:1.27}p{color:#566b7a;margin:19px 0}.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border-radius:999px;padding:10px 16px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;text-decoration:none;text-align:center}#install{background:linear-gradient(110deg,#006d8c,#06847e);border:0;color:#fff;box-shadow:0 8px 24px #06847e22}.secondary{color:#163e55;border:1px solid #c4d9e3;background:#f5faff;margin-top:10px}.btn:focus-visible{outline:3px solid #f1ad45;outline-offset:3px}#status{min-height:24px;font-size:13px;font-weight:700;color:#166a72;margin:13px 0 0}#details{display:none;margin-top:12px;border-radius:15px;background:#eef7fa;padding:14px 16px;font-size:13px;color:#476273}#details.show{display:block}#details strong{color:#19455f}.small{font-size:12px;color:#728392}#debug{display:none;white-space:pre-wrap;word-break:break-word;margin-top:12px;padding:12px;background:#f7f8fa;border-radius:12px;font:12px/1.55 ui-monospace,monospace;color:#40515c}.divider{height:1px;background:#e2edf1;margin:22px 0 17px}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
-<body>
-<main>
- <div class="brand"><img alt="BiteVoyage BV 아이콘" src="./favicon-192.png" width="74" height="74"><div><div class="eyebrow">BITEVOYAGE · PREMIUM</div><h1>아이콘으로 바로 학습</h1></div></div>
- <p>홈 화면에 <b>BV 아이콘</b>을 추가해 두면 영어·일본어·중국어·한국어 여행 회화 학습 게시글로 빠르게 이동할 수 있습니다.</p>
- <button type="button" id="install">📲 BV 아이콘 설치</button>
- <div id="status" role="status" aria-live="polite"></div>
- <div id="note" role="note"></div>
- <p class="small">이미 휴대전화 홈 화면에 BV 아이콘이 있다면 재설치할 필요가 없습니다. 아이콘을 눌러 학습을 시작하세요.</p>
- <div class="divider"></div>
- <a class="link" id="learn" href="https://www.bitevoyage.com/2026/11/travel-language-quest-free-english-japanese-chinese-korean.html">🌐 지금 바로 학습하기</a>
- <p class="small" style="text-align:center;margin-bottom:0">앱스토어 가입 불필요 · 설치는 브라우저와 사용자 승인 필요 · 4개 국어 1,920개 표현</p>
+<body><main>
+<div class="brand"><img src="./favicon-192.png" width="74" height="74" alt="BiteVoyage BV 로고"><div><div class="eyebrow">BITEVOYAGE · PREMIUM</div><h1>BV 아이콘으로 바로 학습</h1></div></div>
+<p>휴대전화 홈 화면에 BV 아이콘을 추가하면 무료 여행 회화 학습 페이지로 편리하게 이동할 수 있습니다.</p>
+<button id="install" class="btn" type="button">📲 BV 아이콘 설치</button>
+<div id="status" role="status" aria-live="polite">브라우저의 설치 지원 여부를 확인하고 있습니다.</div>
+<div id="details" role="note"></div>
+<div class="divider"></div>
+<a id="learn" class="btn secondary" href="https://www.bitevoyage.com/2026/11/travel-language-quest-free-english-japanese-chinese-korean.html">🌐 지금 바로 학습하기</a>
+<p class="small" style="text-align:center">설치는 브라우저의 승인 후 진행됩니다 · 4개 국어 1,920개 표현</p>
+<pre id="debug" aria-label="설치 진단 정보"></pre>
 </main>
 <script>
 (()=>{'use strict';
+const btn=document.getElementById('install'),status=document.getElementById('status'),details=document.getElementById('details'),debug=document.getElementById('debug');
 const LEARN_URL='https://www.bitevoyage.com/2026/11/travel-language-quest-free-english-japanese-chinese-korean.html';
-const btn=document.getElementById('install'),status=document.getElementById('status'),note=document.getElementById('note');
-let deferred=null,installedInSession=false;
-function inform(text){status.textContent=text;}
-function noteText(text){note.textContent=text;note.classList.add('show');}
-function openLesson(){window.location.assign(LEARN_URL);}
-function isStandalone(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;}
-function showManualInstructions(){
- const ua=navigator.userAgent||'';
- if(/iPad|iPhone|iPod/i.test(ua))noteText('iPhone·iPad: Safari에서 이 페이지를 연 뒤 공유 버튼 → 홈 화면에 추가 → 추가를 선택하세요. 일부 브라우저에서는 설치 버튼을 직접 제공하지 않습니다.');
- else if(/Android/i.test(ua))noteText('Android Chrome: 오른쪽 위 ⋮ → 앱 설치 또는 홈 화면에 추가 → 설치/추가를 선택하세요. 이미 BV 아이콘이 있다면 홈 화면에서 실행하세요.');
- else noteText('PC Chrome·Edge: 주소창 또는 브라우저 메뉴의 앱 설치를 이용하세요. 설치가 지원되지 않는 경우 이 페이지를 즐겨찾기에 추가할 수 있습니다.');
- inform('이 브라우저에서는 설치 승인창을 바로 호출할 수 없습니다.');
+let pendingPrompt=null,installedInSession=false,eventObserved=false,swState='확인 전';
+const ua=navigator.userAgent||'';
+const standalone=()=>Boolean((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true);
+const tell=t=>{status.textContent=t;};
+const help=t=>{details.textContent=t;details.classList.add('show');};
+const hideHelp=()=>details.classList.remove('show');
+const learn=()=>window.location.assign(LEARN_URL);
+function browserHelp(){
+ if(/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//i.test(ua))return '현재 앱 내부 브라우저에서는 직접 설치가 제한될 수 있습니다. 오른쪽 메뉴에서 외부 브라우저로 열기 또는 Chrome에서 열기를 선택한 뒤 설치해 주세요.';
+ if(/SamsungBrowser/i.test(ua))return '삼성 인터넷: 메뉴(≡) → 현재 페이지 추가 → 홈 화면을 선택하세요. 지원되는 경우 앱 설치 메뉴가 보일 수도 있습니다.';
+ if(/iPhone|iPad|iPod/i.test(ua))return 'iPhone·iPad: Safari에서 공유 버튼 → 홈 화면에 추가 → 추가를 선택하세요. 시스템 설치창 자동 호출은 지원되지 않을 수 있습니다.';
+ if(/Android/i.test(ua))return 'Android Chrome: 오른쪽 위 ⋮ → 앱 설치 또는 홈 화면에 추가 → 설치/추가를 선택하세요. 이미 설치한 경우에는 홈 화면의 BV 아이콘을 실행하세요.';
+ return 'PC Chrome·Edge: 주소창의 설치 아이콘 또는 브라우저 메뉴의 앱 설치를 선택해 주세요.';
 }
-function markInstalled(message){installedInSession=true;deferred=null;btn.textContent='🌐 설치 완료 · 지금 학습하기';inform(message);note.classList.remove('show');}
-window.addEventListener('beforeinstallprompt',(ev)=>{ev.preventDefault();deferred=ev;inform('설치 가능 · 버튼을 누르면 브라우저 설치 승인창이 열립니다.');note.classList.remove('show');});
-window.addEventListener('appinstalled',()=>markInstalled('✓ 설치가 완료되었습니다. 휴대전화 홈 화면에서 BV 아이콘을 확인하세요.'));
-if(isStandalone())markInstalled('✓ 현재 BV 앱으로 실행 중입니다. 학습 버튼을 눌러 시작하세요.');
+function showFallback(){help(browserHelp());tell('이 기기에서는 직접 설치창을 호출할 수 없습니다. 아래 방법으로 설치할 수 있습니다.');}
+function markInstalled(){pendingPrompt=null;installedInSession=true;btn.textContent='🌐 설치됨 · 지금 학습하기';tell('BV 아이콘이 설치된 상태입니다. 홈 화면에서 아이콘을 확인하세요.');hideHelp();}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();pendingPrompt=e;eventObserved=true;if(!installedInSession){tell('설치 준비 완료 · 버튼을 누르면 설치 승인창이 열립니다.');hideHelp();}});
+window.addEventListener('appinstalled',()=>markInstalled());
+if(standalone())markInstalled();
 btn.addEventListener('click',async()=>{
- if(installedInSession||isStandalone()){openLesson();return;}
- if(deferred){const promptEvent=deferred;deferred=null;
-  try{
-   await promptEvent.prompt();
-   const choice=await promptEvent.userChoice;
-   if(choice&&choice.outcome==='accepted')inform('설치가 승인됐습니다. 홈 화면에 BV 아이콘이 추가되는지 확인하세요.');
-   else {inform('설치 요청이 취소됐습니다.');showManualInstructions();}
-  }catch(e){showManualInstructions();}
-  return;
+ if(installedInSession||standalone()){learn();return;}
+ if(pendingPrompt){
+  const prompt=pendingPrompt;pendingPrompt=null;
+  try{await prompt.prompt();const choice=await prompt.userChoice;
+    if(choice&&choice.outcome==='accepted'){tell('설치 요청을 승인했습니다. 아이콘 생성 여부를 홈 화면에서 확인해 주세요.');hideHelp();}
+    else{tell('설치가 취소되었습니다.');help(browserHelp());}
+  }catch(e){showFallback();}return;
  }
+ // Browser-dependent install API, only on eligible secure contexts.
  if(typeof navigator.install==='function'&&window.isSecureContext){
-  try{await navigator.install();btn.textContent='🌐 BV 학습 시작하기';installedInSession=true;inform('브라우저가 설치 또는 기존 앱 열기 요청을 처리했습니다. 홈 화면을 확인하세요.');note.classList.remove('show');return;}
-  catch(e){if(e&&e.name==='AbortError'){inform('설치 요청이 취소됐습니다.');return;}}
+  try{await navigator.install();tell('설치 요청을 처리했습니다. 홈 화면에 BV 아이콘이 추가됐는지 확인해 주세요.');hideHelp();return;}
+  catch(e){if(e&&e.name==='AbortError'){tell('설치가 취소되었습니다.');return;}}
  }
- showManualInstructions();
+ showFallback();
 });
-if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+ navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(()=>{swState='등록됨';refreshDebug();}).catch(()=>{swState='등록 실패';refreshDebug();});
+}else swState='미지원';
+function refreshDebug(){
+ if(!new URLSearchParams(location.search).has('debug'))return;
+ debug.style.display='block';
+ debug.textContent=['설치 진단 정보 (개인정보 자동 전송 없음)','브라우저: '+(/SamsungBrowser/i.test(ua)?'Samsung Internet':/EdgA|EdgiOS/i.test(ua)?'Edge':/Chrome|CriOS/i.test(ua)?'Chrome 계열':'기타'),'독립 실행: '+standalone(),'직접 설치 신호 수신: '+eventObserved,'설치 API 지원: '+(typeof navigator.install==='function'),'서비스 워커: '+swState,'HTTPS: '+window.isSecureContext].join('\n');
+}
+window.addEventListener('beforeinstallprompt',refreshDebug);
+if(new URLSearchParams(location.search).has('debug')){refreshDebug();}
 })();
-</script>
-</body>
-</html>
+</script></body></html>
