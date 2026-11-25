@@ -4,7 +4,7 @@
   "short_name": "BiteVoyage",
   "description": "영어·일본어·중국어·한국어 총 1,920개 여행 회화. 15개 상황, 초급·중급·고급, 단어 발음, 오답 복습과 퀴즈.",
   "lang": "ko",
-  "start_url": "./launch.html",
+  "start_url": "./launch.html?direct=20261126-r101",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f6fbfe",
@@ -38,7 +38,7 @@
     {
       "name": "여행 회화 학습 시작",
       "short_name": "학습 시작",
-      "url": "./launch.html",
+      "url": "./launch.html?direct=20261126-r101",
       "icons": [
         {
           "src": "./favicon-192.png",
