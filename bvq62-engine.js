@@ -1,4 +1,4 @@
-/* BiteVoyage Language Quest Premium V6.3 r10 audio clarity | 1920 expressions | clickable word audio | PWA intact */
+/* BiteVoyage Language Quest Premium V6.3 r11 hybrid audio | 1920 expressions | clickable word audio | PWA intact */
 (function(){
 'use strict';
 function boot(){
@@ -14,7 +14,7 @@ function boot(){
  const LEVEL_LABELS={'beginner':'초급','intermediate':'중급','advanced':'고급'};
  const EXPECTED={'beginner':16,'intermediate':8,'advanced':8};
  let total=0,readings=0,aligned=0,integrityError='';
- if(cfg.version!=='6.3.0'||cfg.build_id!=='bvq63-20261123-pronunciation-r8'||cfg.audio_revision!=='r10-20261126') integrityError='데이터·엔진 버전 불일치';
+ if(cfg.version!=='6.3.0'||cfg.build_id!=='bvq63-20261123-pronunciation-r8'||cfg.audio_revision!=='r11-20261126') integrityError='데이터·엔진 버전 불일치';
  if(!integrityError) for(const lng of supported){
   if(!cfg.data[lng]){integrityError='언어 데이터 누락: '+lng;break;}
   for(const sc of cfg.scenes.map(s=>s[0])){
@@ -51,10 +51,11 @@ function boot(){
  function decode(v){let s=String(v==null?'':v);const t=document.createElement('textarea');for(let i=0;i<5;i++){t.innerHTML=s;const n=t.value;if(n===s)break;s=n;}return s;}
  function put(id,value){$(id).textContent=decode(value);}
  function make(tag,cl,value){const x=document.createElement(tag);if(cl)x.className=cl;if(value!==undefined)x.textContent=decode(value);return x;}
- let activeAudioButton=null, activeUtterance=null, audioTimer=null;
+ let activeAudioButton=null, activeUtterance=null, audioTimer=null, activeMedia=null;
  function clearWordAudio(){if(activeAudioButton){activeAudioButton.classList.remove('bv-word-playing');activeAudioButton.setAttribute('aria-pressed','false');activeAudioButton=null;}}
  function stop(){audioSeq++; if(audioTimer!==null){clearTimeout(audioTimer);audioTimer=null;}
   const wasActive=!!activeUtterance;activeUtterance=null;clearWordAudio();
+  if(activeMedia){const a=activeMedia;activeMedia=null;a.onended=null;a.onerror=null;a.onplaying=null;try{a.pause();a.removeAttribute('src');a.load();}catch(e){}}
   if('speechSynthesis' in window){try{const s=window.speechSynthesis;if(wasActive||s.speaking||s.pending)s.cancel();}catch(e){}}
  }
  const rows=()=>DATA[lang][scene][level],current=()=>rows()[idx];
@@ -329,7 +330,7 @@ function boot(){
   $('segment-box').hidden=!available||!settings.segments;
   $('segment-toggle').setAttribute('aria-pressed',String(settings.segments));
   $('segment-toggle').textContent=settings.segments?'단어 구분 숨기기':'단어 구분 보기';
-  if(!available)return;
+  if(!available){$('aligned-chips').replaceChildren();return;}
   const pairs=alignedPairs(current()[0],current()[1],lang);
   put('segment-line',pairs.map(x=>x[0]).join(' '));
   put('roman',pairs.map(x=>x[1]).join(' '));
@@ -436,9 +437,19 @@ function boot(){
  for(const [v,t] of [['clear','명료하게 · 읽기 보정 (권장)'],['native','원문 그대로 · 자연스러운 회화'],['segments','구절별 · 끊어 듣기']]){const o=make('option','',t);o.value=v;modeSelect.append(o);}
  modeSelect.value=jaMode;modeBox.append(modeLabel,modeSelect);voiceBox.append(modeBox);
  modeSelect.addEventListener('change',()=>{stop();jaMode=modeSelect.value;try{localStorage.setItem(modeKey,jaMode);}catch(e){}put('status','발음 방식을 변경했습니다. 다시 들어보세요.');updateAudioInfo();});
+ const fixedIndex=window.BVQ_FIXED_AUDIO&&window.BVQ_FIXED_AUDIO.revision==='r11-20261126'?window.BVQ_FIXED_AUDIO.files:{};
+ const fixedFiles=fixedIndex&&typeof fixedIndex==='object'?fixedIndex:{};
+ const fixedBase='https://yesafrica-byte.github.io/bitevoyage-language/';
+ const fixedPref='bvq-r11-source';let fixedMode='auto';try{if(localStorage.getItem(fixedPref)==='device')fixedMode='device';}catch(e){}
+ const fixedBox=make('div','bv-audio-mode');const fixedLabel=make('label','','음원 방식');fixedLabel.htmlFor='bvq3-fixed-source';
+ const fixedSelect=make('select','');fixedSelect.id='bvq3-fixed-source';
+ for(const [v,t] of [['auto','고정 MP3 우선 · 없으면 기기 음성'],['device','기기 TTS만 사용 · 음성 비교']]){const o=make('option','',t);o.value=v;fixedSelect.append(o);}
+ fixedSelect.value=fixedMode;fixedBox.append(fixedLabel,fixedSelect);voiceBox.prepend(fixedBox);
+ fixedSelect.addEventListener('change',()=>{stop();fixedMode=fixedSelect.value;try{localStorage.setItem(fixedPref,fixedMode);}catch(e){}updateAudioInfo();put('status','음원 방식을 변경했습니다.');});
+ function fixedPath(kind,text){const key=kind==='phrase'?current()[0]:text;const path=fixedFiles[JSON.stringify([lang,kind,key])];return typeof path==='string'&&new RegExp('^audio/'+lang+'/[a-f0-9]{24}\\.mp3$').test(path)?path:null;}
  const info=make('details','bv-audio-info');info.append(make('summary','','음성 진단 · 실제 재생 입력 / 버전'));const infoText=make('p','');info.append(infoText);voiceBox.append(info);
  function updateAudioInfo(last){const voices=languageVoices(lang);const v=voices.find(x=>x.voiceURI===voicePrefs[lang])||voices[0];
-  modeBox.hidden=lang!=='ja';infoText.textContent='R10 · '+(v?v.name+' ('+v.lang+')':'음성 없음')+' · '+(last|| (lang==='ja'&&jaMode==='segments'?jaSegments(current()).join(' / '):phraseSpeech(current(),lang)))+' · 실제 음성은 기기 TTS에서 생성됩니다.';
+  modeBox.hidden=lang!=='ja';infoText.textContent='R11 · 등록 MP3 '+Object.keys(fixedFiles).length+'개 · '+(v?v.name+' ('+v.lang+')':'음성 없음')+' · '+(last|| (lang==='ja'&&jaMode==='segments'?jaSegments(current()).join(' / '):phraseSpeech(current(),lang)))+' · MP3 미등록 또는 기기 음성 선택 시 TTS에서 생성됩니다.';
  }
 
  function eligibleVoice(v,lng){
@@ -471,6 +482,23 @@ function boot(){
  voiceSelect.addEventListener('change',()=>{stop();voicePrefs[lang]=voiceSelect.value;try{localStorage.setItem(voicePrefKey,JSON.stringify(voicePrefs));}catch(e){}put('status','음성을 선택했습니다. 발음 버튼을 눌러 보세요.');updateAudioInfo();});
  if(synth&&typeof synth.addEventListener==='function')synth.addEventListener('voiceschanged',refreshVoices);
  function speakText(text,speed,kind,sourceButton){
+  const phraseAllowed=kind!=='phrase'||lang!=='ja'||jaMode==='clear';
+  const path=fixedMode==='auto'&&phraseAllowed&&!Array.isArray(text)?fixedPath(kind,text):null;
+  if(!path||typeof Audio==='undefined'){speakDeviceText(text,speed,kind,sourceButton);return;}
+  if(sourceButton&&activeAudioButton===sourceButton){stop();put('status','단어 듣기를 정지했습니다.');return;}
+  stop();const seq=audioSeq;const lng=lang;let a;
+  try{a=new Audio(fixedBase+path);}catch(e){speakDeviceText(text,speed,kind,sourceButton);return;}
+  activeMedia=a;a.preload='auto';a.playbackRate=speed/.90;
+  if('preservesPitch' in a)a.preservesPitch=true;
+  if(sourceButton){activeAudioButton=sourceButton;sourceButton.classList.add('bv-word-playing');sourceButton.setAttribute('aria-pressed','true');}
+  let failed=false;
+  function fallback(){if(failed||seq!==audioSeq||lang!==lng)return;failed=true;stop();put('status','MP3 재생 실패 · 기기 음성으로 전환');speakDeviceText(text,speed,kind,sourceButton);}
+  a.onplaying=()=>{if(seq!==audioSeq)return;if(audioTimer!==null){clearTimeout(audioTimer);audioTimer=null;}put('status','고정 MP3 음원 재생 중');infoText.textContent='R11 · 고정 MP3 · '+path;};
+  a.onended=()=>{if(seq!==audioSeq)return;activeMedia=null;clearWordAudio();put('status','고정 MP3 재생 완료');};
+  a.onerror=fallback;audioTimer=setTimeout(fallback,8000);put('status','고정 MP3 준비 중…');
+  try{const playing=a.play();if(playing&&typeof playing.catch==='function')playing.catch(fallback);}catch(e){fallback();}
+ }
+ function speakDeviceText(text,speed,kind,sourceButton){
   if(!synth||typeof SpeechSynthesisUtterance==='undefined'){put('status','이 브라우저에서는 음성 재생을 지원하지 않습니다.');return;}
   const parts=(Array.isArray(text)?text:[text]).map(t=>decode(t).trim()).filter(Boolean);if(!parts.length)return;
   if(sourceButton&&activeAudioButton===sourceButton){stop();put('status','단어 듣기를 정지했습니다.');return;}
@@ -670,7 +698,7 @@ function boot(){
    }catch(e){openInstallGateway();}
   }else openInstallGateway();
  });
- restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToStart(true);status('✓ V6.3 R10 음성 명료도 개선 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
+ restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToStart(true);status('✓ V6.3 R11 고정 음원 지원 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
  if(document.readyState==='complete')initAds();else window.addEventListener('load',initAds,{once:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
