@@ -1,4 +1,4 @@
-/* BiteVoyage Language Quest Premium V6.3 r8 | 1920 expressions | clickable word audio | PWA intact */
+/* BiteVoyage Language Quest Premium V6.3 r9 audio precision | 1920 expressions | clickable word audio | PWA intact */
 (function(){
 'use strict';
 function boot(){
@@ -51,9 +51,9 @@ function boot(){
  function decode(v){let s=String(v==null?'':v);const t=document.createElement('textarea');for(let i=0;i<5;i++){t.innerHTML=s;const n=t.value;if(n===s)break;s=n;}return s;}
  function put(id,value){$(id).textContent=decode(value);}
  function make(tag,cl,value){const x=document.createElement(tag);if(cl)x.className=cl;if(value!==undefined)x.textContent=decode(value);return x;}
- let activeAudioButton=null;
+ let activeAudioButton=null, activeUtterance=null;
  function clearWordAudio(){if(activeAudioButton){activeAudioButton.classList.remove('bv-word-playing');activeAudioButton.setAttribute('aria-pressed','false');activeAudioButton=null;}}
- function stop(){audioSeq++;clearWordAudio();if('speechSynthesis' in window){try{speechSynthesis.cancel();}catch(e){}}}
+ function stop(){audioSeq++;activeUtterance=null;clearWordAudio();if('speechSynthesis' in window){try{speechSynthesis.cancel();}catch(e){}}}
  const rows=()=>DATA[lang][scene][level],current=()=>rows()[idx];
  const phraseKey=()=>lang+'|'+scene+'|'+(level==='beginner'?idx:level+'|'+idx);
  const LAST='bvq-v6-last';
@@ -392,7 +392,7 @@ function boot(){
   $('roman-box').hidden=!showReading;$('roman-toggle').textContent=showReading?'발음 표기 숨기기':'발음 표기 보기';
   syncSegment();put('meaning',r[2]);put('position',(idx+1)+' / '+rows().length);
   $('prev').disabled=idx===0;$('next').disabled=idx===rows().length-1;$('bar').style.width=(100*(idx+1)/rows().length)+'%';
-  put('status','발음 버튼을 눌러 들어보세요.');feedback('','info');renderQuiz();renderVocab();stats();remember();
+  refreshVoices();put('status','발음 버튼을 눌러 들어보세요.');feedback('','info');renderQuiz();renderVocab();stats();remember();
   const completed=rows().filter((_,i)=>progress.done[lang+'|'+scene+'|'+(level==='beginner'?i:level+'|'+i)]).length;
   put('level-progress',LEVEL_LABELS[level]+' 완료 '+completed+' / '+rows().length);
   $('continue').textContent='↗ 이어서 학습';
@@ -419,33 +419,78 @@ function boot(){
  $('segment-toggle').addEventListener('click',()=>{settings.segments=!settings.segments;saveSettings();syncSegment();});
  $('sound-toggle').addEventListener('click',()=>{settings.sounds=!settings.sounds;saveSettings();syncSound();if(settings.sounds)cue(true);});
  $('search').addEventListener('input',filterScenes);
- // One speech controller for phrases, vocabulary cards and individual aligned words.
- // Natural-script text is sent to the language-matched TTS voice; romanization is visual only.
+ // R9: language-safe voice selection, user override, and targeted Japanese readings.
+ const synth=window.speechSynthesis;
+ const voicePrefKey='bvq-r9-voice';
+ let voicePrefs={};try{voicePrefs=JSON.parse(localStorage.getItem(voicePrefKey)||'{}')||{};}catch(e){}
+ const voiceBox=make('div','');voiceBox.style.cssText='margin:8px 0 12px;font-size:13px;line-height:1.5';
+ const voiceLabel=make('label','','음성 선택 · ');voiceLabel.htmlFor='bvq3-voice-choice';
+ const voiceSelect=make('select','');voiceSelect.id='bvq3-voice-choice';voiceSelect.style.cssText='max-width:100%;width:100%;padding:8px;border:1px solid #c6d8e7;border-radius:12px;background:#fff;color:#17344e;font-size:13px';
+ voiceBox.append(voiceLabel,voiceSelect);$('status').before(voiceBox);
+ function eligibleVoice(v,lng){
+  const tag=String(v.lang||'').toLowerCase().replace(/_/g,'-');
+  if(lng==='zh')return /^(zh|cmn)(?:-hans)?(?:-cn)?$/.test(tag)||tag==='zh-hans-cn'||tag==='cmn-hans-cn';
+  if(lng==='en')return tag==='en-us'||tag==='en';
+  if(lng==='ja')return tag==='ja-jp'||tag==='ja';
+  if(lng==='ko')return tag==='ko-kr'||tag==='ko';
+  return false;
+ }
+ function voiceScore(v,lng){
+  const tag=String(v.lang||'').toLowerCase().replace(/_/g,'-');
+  let score=tag===LANGS[lng][3].toLowerCase()?100:0;
+  if(/natural|neural|premium|enhanced|wavenet/i.test(v.name||''))score+=30;
+  if(/google/i.test(v.name||''))score+=15;
+  if(v.localService)score+=5;
+  if(v.default)score+=2;
+  return score;
+ }
+ function languageVoices(lng){
+  try{return (synth?synth.getVoices():[]).filter(v=>eligibleVoice(v,lng)).sort((a,b)=>voiceScore(b,lng)-voiceScore(a,lng));}catch(e){return [];}
+ }
+ function refreshVoices(){
+  const voices=languageVoices(lang);voiceSelect.replaceChildren();
+  const auto=make('option','',voices.length?'자동 선택 · '+voices[0].name:'사용 가능한 해당 언어 음성 없음');auto.value='';voiceSelect.append(auto);
+  for(const v of voices){const o=make('option','',v.name+' ('+v.lang+')');o.value=v.voiceURI;voiceSelect.append(o);}
+  voiceSelect.value=voices.some(v=>v.voiceURI===voicePrefs[lang])?voicePrefs[lang]:'';
+  voiceSelect.disabled=!voices.length;
+ }
+ voiceSelect.addEventListener('change',()=>{stop();voicePrefs[lang]=voiceSelect.value;try{localStorage.setItem(voicePrefKey,JSON.stringify(voicePrefs));}catch(e){}put('status','음성을 선택했습니다. 발음 버튼을 눌러 보세요.');});
+ if(synth&&typeof synth.addEventListener==='function')synth.addEventListener('voiceschanged',refreshVoices);
  function speakText(text,speed,kind,sourceButton){
-  if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){
-   put('status','이 브라우저에서는 음성 재생을 지원하지 않습니다.');return;
-  }
+  if(!synth||typeof SpeechSynthesisUtterance==='undefined'){put('status','이 브라우저에서는 음성 재생을 지원하지 않습니다.');return;}
   const spoken=decode(text).trim();if(!spoken)return;
   if(sourceButton&&activeAudioButton===sourceButton){stop();put('status','단어 듣기를 정지했습니다.');return;}
-  stop();const seq=audioSeq;
+  stop();const seq=audioSeq;const voices=languageVoices(lang);
+  if(!voices.length){refreshVoices();put('status',LANGS[lang][1]+' 음성이 아직 준비되지 않았습니다. 잠시 후 다시 누르거나 기기 TTS 언어팩을 설치해 주세요. 다른 언어로 대신 재생하지 않습니다.');return;}
+  const voice=voices.find(v=>v.voiceURI===voicePrefs[lang])||voices[0];
   if(sourceButton){activeAudioButton=sourceButton;sourceButton.classList.add('bv-word-playing');sourceButton.setAttribute('aria-pressed','true');}
-  const u=new SpeechSynthesisUtterance(spoken);u.lang=LANGS[lang][3];u.rate=speed;u.pitch=1;u.volume=1;
-  try{
-   const voices=speechSynthesis.getVoices()||[];
-   const locale=u.lang.toLowerCase(),base=locale.split('-')[0];
-   const voice=voices.find(v=>v.lang.toLowerCase()===locale)||voices.find(v=>v.lang.toLowerCase().split('-')[0]===base);
-   if(voice)u.voice=voice;
-  }catch(e){}
-  const playing=kind==='word'?'단어 발음':speed<1?'천천히 재생':'발음 재생';
-  u.onstart=()=>{if(seq===audioSeq)put('status',playing+' 중…');};
-  u.onend=()=>{if(seq===audioSeq){clearWordAudio();put('status','재생 완료');}};
-  u.onerror=e=>{if(seq===audioSeq){clearWordAudio();if(e.error!=='canceled'&&e.error!=='interrupted')put('status','음성 엔진 또는 해당 언어팩을 확인해 주세요.');}};
-  put('status',playing+' 준비 중…');
-  try{speechSynthesis.speak(u);}catch(e){clearWordAudio();put('status','음성 재생에 실패했습니다.');}
+  const u=new SpeechSynthesisUtterance(spoken);activeUtterance=u;u.lang=LANGS[lang][3];u.voice=voice;u.rate=speed;u.pitch=1;u.volume=1;
+  const playing=kind==='word'?'단어 발음':speed<.85?'천천히 재생':'발음 재생';
+  u.onstart=()=>{if(seq===audioSeq)put('status',playing+' 중… · '+voice.name);};
+  u.onend=()=>{if(seq===audioSeq){activeUtterance=null;clearWordAudio();put('status','재생 완료 · '+voice.name);}};
+  u.onerror=e=>{if(seq===audioSeq){activeUtterance=null;clearWordAudio();if(e.error!=='canceled'&&e.error!=='interrupted')put('status','음성 재생 실패 · '+voice.name+' · 다른 음성 또는 기기 언어팩을 확인해 주세요.');}};
+  put('status',playing+' 준비 중… · '+voice.name);
+  try{if(synth.paused)synth.resume();synth.speak(u);}catch(e){activeUtterance=null;clearWordAudio();put('status','음성 재생에 실패했습니다.');}
  }
- function speak(speed){rate=speed;speakText(current()[0],speed,'phrase',null);}
- // Japanese word-button TTS: turn the authored Hepburn reading into kana.
- // Only word cards use this path; sentence TTS and all display strings stay intact.
+ // Preserve punctuation, particles and native orthography except curated readings.
+ function phraseSpeech(row,lng){
+  if(lng!=='ja')return row[0];
+  return row[4]||jaPhraseSpeech(row);
+ }
+ function jaPhraseSpeech(row){
+  const special={'二人':'ふたり','一人':'ひとり','今日':'きょう','明日':'あした','昨日':'きのう','一つ':'ひとつ','二つ':'ふたつ','三つ':'みっつ','四つ':'よっつ','五つ':'いつつ','何人':'なんにん','何時':'なんじ'};
+  return (row[3]||[]).length?row[3].map(([script,reading])=>{
+   const m=script.match(/^(.*?)([。！？、!?.,…]*)$/u);const word=m[1],punct=m[2];
+   const r=reading.toLowerCase().replace(/[.?!。、！？]/g,'').trim();
+   if(word==='何'&&(r==='nan'||r==='nani'))return (r==='nan'?'なん':'なに')+punct;
+   if(word==='後'&&(r==='ato'||r==='go'))return (r==='ato'?'あと':'ご')+punct;
+   // Only substitute when the authored pronunciation agrees; native script is safer otherwise.
+   const replacement=special[word];
+   if(replacement&&jaKanaReading(r)===replacement)return replacement+punct;
+   return script;
+  }).join(''):row[0];
+ }
+ function speak(speed){rate=speed;speakText(phraseSpeech(current(),lang),speed,'phrase',null);}
  function jaKanaReading(romaji){
   if(typeof romaji!=='string')return null;
   let s=romaji.toLowerCase().trim()
@@ -485,12 +530,19 @@ function boot(){
   return chunks.join('').trim()||null;
  }
  function jaWordSpeech(script,reading){
-  // Leave kana/Latin text to the voice itself. Disambiguate only Han-containing words.
-  if(lang!=='ja'||!/[\u3400-\u9fff々〆ヶ]/u.test(script))return script;
-  // Hepburn macrons cannot distinguish おう from おお or とう from とお.
-  const special={'大通り':'おおどおり','大きい':'おおきい','大雨':'おおあめ',
-    '大幅':'おおはば','通り':'とおり','通って':'とおって','通れます':'とおれます'};
-  return special[script]||jaKanaReading(reading)||script;
+  if(lang!=='ja')return script;
+  const m=script.match(/^(.*?)([。！？、!?.,…]*)$/u), word=m[1], punct=m[2];
+  const r=reading.toLowerCase().replace(/[.?!。、！？]/g,'').trim();
+  const fixed=jaPhraseSpeech([script,reading,'',[[script,reading]]]);
+  if(fixed!==script)return fixed;
+  // Particles spoken alone must use their grammatical pronunciation.
+  if(word==='は'&&r==='wa')return 'わ'+punct;
+  if(word==='へ'&&r==='e')return 'え'+punct;
+  if(word==='を'&&r==='o')return 'お'+punct;
+  const special={'大通り':'おおどおり','大きい':'おおきい','大雨':'おおあめ','大幅':'おおはば','通り':'とおり','通って':'とおって','通れます':'とおれます'};
+  // Standalone kanji often need explicit readings. Retain original when conversion is uncertain.
+  if(!/[\u3400-\u9fff々〆ヶ]/u.test(word))return script;
+  return (special[word]||jaKanaReading(r)||word)+punct;
  }
 
  function zhWordSpeech(script,reading){
@@ -521,7 +573,7 @@ function boot(){
  }
  $('vocab-list').addEventListener('click',e=>wordClick(e,$('vocab-list')));
  $('aligned-chips').addEventListener('click',e=>wordClick(e,$('aligned-chips')));
- $('speak').addEventListener('click',()=>speak(1));$('slow').addEventListener('click',()=>speak(.55));$('repeat').addEventListener('click',()=>speak(rate));$('stop').addEventListener('click',()=>{stop();put('status','정지했습니다.');});
+ $('speak').addEventListener('click',()=>speak(.95));$('slow').addEventListener('click',()=>speak(.72));$('repeat').addEventListener('click',()=>speak(rate));$('stop').addEventListener('click',()=>{stop();put('status','정지했습니다.');});
  function move(delta){
   if(!reviewOnly){const dest=idx+delta;if(dest>=0&&dest<rows().length){stop();idx=dest;render();}return;}
   const candidates=rows().map((_,i)=>i).filter(i=>progress.wrong[lang+'|'+scene+'|'+(level==='beginner'?i:level+'|'+i)]&&!progress.done[lang+'|'+scene+'|'+(level==='beginner'?i:level+'|'+i)]);
@@ -593,7 +645,7 @@ function boot(){
    }catch(e){openInstallGateway();}
   }else openInstallGateway();
  });
- restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToStart(true);status('✓ V6.3 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
+ restore();syncSound();render();filterScenes();if(window.location.hash==='#bvq-start')scrollToStart(true);status('✓ V6.3 r9 음성 개선 연결 완료 · 총 '+total+'개 표현 · 발음 표기 '+readings+'/'+total+'개 · 3단계 학습');
  if(document.readyState==='complete')initAds();else window.addEventListener('load',initAds,{once:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
