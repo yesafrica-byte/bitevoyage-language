@@ -162,7 +162,7 @@
 <p id="bvq3-share-notice" class="bv-note" role="status" aria-live="polite"></p>
 <p class="bv-note">브라우저에 따라 설치창 또는 전용 설치 페이지가 열립니다. 설치는 사용자가 승인하며, BV 아이콘은 이 게시글로 연결됩니다. 지원하지 않는 브라우저에서는 BV 아이콘 설치 및 바로가기 안내를 제공합니다.</p>
 </section>
-<p class="bv-note">BiteVoyage Language Quest Premium V6.3.0 R11 · 총 1,920개 표현 유지 · 일본어 명료/원문/구절별 음성 모드 · 영어 IPA·한중일 읽기/해설 품질 보강 및 여행 장소 표현 교정. 일본어·중국어 단어 분리와 발음 단위 정렬은 학습용 표기이며, 영어 IPA·중국어 병음·한국어 로마자는 일부 기계 생성·수동 보정된 참고 자료입니다. 1,920개 전체의 전문 원어민 감수는 완료되지 않았으며, 고정 MP3 음원이 등록된 표현은 해당 음원을 우선 재생합니다. 미등록 표현 및 재생 실패 시 브라우저 TTS를 사용하며 기기별 발음 차이가 있을 수 있습니다.</p>
+<p class="bv-note">BiteVoyage Language Quest Premium V6.3.0 R12 · SNS 음성 호환성 개선 · 총 1,920개 표현 유지 · 일본어 명료/원문/구절별 음성 모드 · 영어 IPA·한중일 읽기/해설 품질 보강 및 여행 장소 표현 교정. 일본어·중국어 단어 분리와 발음 단위 정렬은 학습용 표기이며, 영어 IPA·중국어 병음·한국어 로마자는 일부 기계 생성·수동 보정된 참고 자료입니다. 1,920개 전체의 전문 원어민 감수는 완료되지 않았으며, 고정 MP3 음원이 등록된 표현은 해당 음원을 우선 재생합니다. 미등록 표현 및 재생 실패 시 브라우저 TTS를 사용하며 기기별 발음 차이가 있을 수 있습니다. 앱 내부 브라우저에서 음성이 제한되면 Chrome 또는 Safari에서 열어 주세요.</p>
 </div>
 
 
@@ -172,11 +172,18 @@
 #bvq-v3 .bv-learning,#bvq-v3 .bv-learning>*,#bvq-v3 .bv-phrase,#bvq-v3 .bv-word-panel,#bvq-v3 .bv-vocab-grid,#bvq-v3 .bv-actions,#bvq-v3 .bv-audio-mode{min-width:0;max-width:100%}
 #bvq-v3 .bv-audio-mode{margin:8px 0}#bvq-v3 .bv-audio-mode label{display:block;font-weight:700}#bvq-v3 .bv-audio-mode select{display:block;width:100%;max-width:100%;padding:8px;border:1px solid #c6d8e7;border-radius:12px;background:#fff;color:#17344e;font:inherit}
 #bvq-v3 .bv-audio-mode[hidden]{display:none!important}#bvq-v3 .bv-audio-info{font-size:12px;color:#49677b;margin:8px 0;overflow-wrap:anywhere}#bvq-v3 .bv-audio-info summary{cursor:pointer}#bvq-v3 .bv-audio-info p{white-space:normal;overflow-wrap:anywhere}
+/* R12 audio help: scoped, stable controls; no ad removal */
+#bvq-v3 .bv-r12-help{margin:12px 0 0;padding:13px;border:1px solid #c9deec;border-radius:15px;background:#f3f9ff;color:#17344e;min-width:0;overflow-wrap:anywhere}
+#bvq-v3 .bv-r12-help[hidden]{display:none!important}
+#bvq-v3 .bv-r12-help strong{font-size:15px;color:#174969}#bvq-v3 .bv-r12-help p{font-size:13px!important;line-height:1.65;margin:7px 0}
+#bvq-v3 .bv-r12-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}#bvq-v3 .bv-r12-actions .bv-tool-pill{min-height:44px!important;height:auto!important;max-width:100%;min-width:0;flex:0 1 auto}
+#bvq-v3 .bv-actions{align-items:start!important}#bvq-v3 .bv-actions>.bv-action{height:auto!important;min-height:48px!important;align-self:start!important}
+@media(max-width:600px){#bvq-v3 .bv-r12-actions .bv-tool-pill{flex:1 1 130px}}
 </style>
 <!-- Share and shortcut launch the canonical Blogger URL. External files must be in this exact order: DATA, then ENGINE. -->
 <script defer src="./bvq62-data.js?v=bvq63-20261126-audio-r11"></script>
 <script defer src="./audio-index.js?v=bvq63-20261126-audio-r11"></script>
-<script defer src="./bvq62-engine.js?v=bvq63-20261126-audio-r11"></script>
-<!-- END V6.3 -->
+<script defer src="./bvq62-engine-r12.js?v=bvq63-20261128-sns-r12"></script>
+<!-- END V6.3 R12 -->
 
 <script>if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});</script></body></html>
